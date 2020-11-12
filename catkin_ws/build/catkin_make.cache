@@ -1,0 +1,2 @@
+ivr_assignment
+-DCATKIN_DEVEL_PREFIX=/home/sky/Desktop/IVR/IVR_Assignment/catkin_ws/devel -DCMAKE_INSTALL_PREFIX=/home/sky/Desktop/IVR/IVR_Assignment/catkin_ws/install -G Unix Makefiles
