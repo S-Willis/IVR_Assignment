@@ -26,8 +26,14 @@ class image_converter:
     self.bridge = CvBridge()
 
     #initialize publishers to send sinusoidal signals to joints
+    self.robot_joint2_pub = rospy.Publisher("/robot/joint2_position_controller/command",Float64,queue_size=1)
 
-
+  def getAngles(self):
+      time = rospy.get_time()
+      joint2 = (math.pi/2)*math.sin((math.pi/15)*time)
+      joint3 = 0
+      joint4 = 0
+      return [joint2,joint3,joint4]
 
   def pixels_to_metres(self, image):
     blue_centre = self.findBlueCentre(image)
@@ -66,7 +72,7 @@ class image_converter:
     angle_one = np.arctan2(yellow_centre[0] - blue_centre[0], yellow_centre[1] - blue_centre[1])
     angle_two = np.arctan2(blue_centre[0] - green_centre[0], blue_centre[1] - green_centre[1]) - angle_one
     angle_three = np.arctan2(green_centre[0] - red_centre[0], green_centre[1] - red_centre[1]) - angle_two - angle_one
-    print(np.array([angle_one, angle_two, angle_three]))
+    # print(np.array([angle_one, angle_two, angle_three]))
     return np.array([angle_one, angle_two, angle_three])
 
   # Recieve data from camera 1, process it, and publish
@@ -86,11 +92,23 @@ class image_converter:
 
     # im1 = cv2.imshow('window1', self.cv_image1)
     cv2.waitKey(1)
+
+
+    angles = self.getAngles()
+
+    self.joint2 = Float64()
+    self.joint2.data = angles[0]
+
     # Publish the results
+
+
     try:
       self.image_pub1.publish(self.bridge.cv2_to_imgmsg(self.cv_image1, "bgr8"))
+      self.robot_joint2_pub.publish(self.joint2)
     except CvBridgeError as e:
       print(e)
+
+
 
 
 def publish_angle_2(time):
@@ -98,15 +116,14 @@ def publish_angle_2(time):
     angle2 = (math.pi/2)*math.sin((math.pi/15)*time)
     joint2 = Float64()
     joint2.data = angle2
+    print(joint2.data)
     angle_pub2.publish(joint2)
     return
 
 # call the class
 def main(args):
   ic = image_converter()
-  cur_time = rospy.get_time()
 
-  publish_angle_2(cur_time)
 
   try:
     rospy.spin()
