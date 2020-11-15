@@ -24,6 +24,27 @@ class image_converter:
     # initialize the bridge between openCV and ROS
     self.bridge = CvBridge()
 
+  def findCentre(self, image, lower, upper, colour):
+    mask = cv2.inRange(image, lower, upper)
+    kernel = np.ones((5, 5), np.uint8)
+    mask = cv2.dilate(mask, kernel, iterations=3)
+    cv2.imwrite(colour+"_C2.png", mask)
+    M = cv2.moments(mask)
+    cx = int(M['m10']/M['m00'])
+    cy = int(M['m01']/M['m00'])
+    return np.array([cx, cy])
+
+  def findYellowCentre(self, image):
+    return self.findCentre(image, (0, 80, 80), (30, 255, 255), "yellowJoint")
+
+  def findBlueCentre(self, image):
+    return self.findCentre(image, (90, 0, 0), (255, 70, 70), "blueJoint")
+
+  def findGreenCentre(self, image):
+    return self.findCentre(image, (0, 60, 0), (50, 255, 50), "greenJoint")
+
+  def findRedCentre(self, image):
+    return self.findCentre(image, (0, 0, 40), (30, 30, 255), "redJoint")
 
   # Recieve data, process it, and publish
   def callback2(self,data):
@@ -34,7 +55,7 @@ class image_converter:
       print(e)
     # Uncomment if you want to save the image
     cv2.imwrite('image_copy_img2.png', self.cv_image)
-    im2=cv2.imshow('window2', self.cv_image2)
+    #im2=cv2.imshow('window2', self.cv_image2)
     cv2.waitKey(1)
 
     # Publish the results

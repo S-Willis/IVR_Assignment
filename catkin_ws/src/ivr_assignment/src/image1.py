@@ -28,7 +28,7 @@ class image_converter:
     mask = cv2.inRange(image, lower, upper)
     kernel = np.ones((5, 5), np.uint8)
     mask = cv2.dilate(mask, kernel, iterations=3)
-    cv2.imwrite(colour+".png", mask)
+    cv2.imwrite(colour+"_C1.png", mask)
     M = cv2.moments(mask)
     cx = int(M['m10']/M['m00'])
     cy = int(M['m01']/M['m00'])
@@ -47,7 +47,7 @@ class image_converter:
     return self.findCentre(image, (0, 0, 40), (30, 30, 255), "redJoint")
 
   # Recieve data from camera 1, process it, and publish
-  def callback1(self,data):
+  def callback1(self, data):
     # Recieve the image
     # img = self.bridge.imgmsg_to_cv2(data, "bgr8")
     try:
@@ -56,15 +56,15 @@ class image_converter:
     except CvBridgeError as e:
       print(e)
 
-    print(self.findYellowCentre(self.cv_image1))
-    print(self.findBlueCentre(self.cv_image1))
-    print(self.findGreenCentre(self.cv_image1))
-    print(self.findRedCentre(self.cv_image1))
+    #print(self.findYellowCentre(self.cv_image1))
+    #print(self.findBlueCentre(self.cv_image1))
+    #print(self.findGreenCentre(self.cv_image1))
+    #print(self.findRedCentre(self.cv_image1))
 
     # Uncomment if you want to save the image
     cv2.imwrite('image_copy_img1.png', self.cv_image1)
 
-    im1=cv2.imshow('window1', self.cv_image1)
+    # im1 = cv2.imshow('window1', self.cv_image1)
     cv2.waitKey(1)
     # Publish the results
     try:
