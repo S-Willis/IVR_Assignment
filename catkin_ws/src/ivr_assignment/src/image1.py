@@ -27,12 +27,14 @@ class image_converter:
 
     #initialize publishers to send sinusoidal signals to joints
     self.robot_joint2_pub = rospy.Publisher("/robot/joint2_position_controller/command",Float64,queue_size=1)
+    self.robot_joint3_pub = rospy.Publisher("/robot/joint3_position_controller/command",Float64,queue_size=1)
+    self.robot_joint4_pub = rospy.Publisher("/robot/joint4_position_controller/command",Float64,queue_size=1)
 
   def getAngles(self):
       time = rospy.get_time()
       joint2 = (math.pi/2)*math.sin((math.pi/15)*time)
-      joint3 = 0
-      joint4 = 0
+      joint3 = (math.pi/2)*math.sin((math.pi/18)*time)
+      joint4 = (math.pi/2)*math.sin((math.pi/20)*time)
       return [joint2,joint3,joint4]
 
   def pixels_to_metres(self, image):
@@ -98,6 +100,10 @@ class image_converter:
 
     self.joint2 = Float64()
     self.joint2.data = angles[0]
+    self.joint3 = Float64()
+    self.joint3.data = angles[1]
+    self.joint4 = Float64()
+    self.joint4.data = angles[2]
 
     # Publish the results
 
@@ -105,6 +111,8 @@ class image_converter:
     try:
       self.image_pub1.publish(self.bridge.cv2_to_imgmsg(self.cv_image1, "bgr8"))
       self.robot_joint2_pub.publish(self.joint2)
+      self.robot_joint3_pub.publish(self.joint3)
+      self.robot_joint4_pub.publish(self.joint4)
     except CvBridgeError as e:
       print(e)
 
