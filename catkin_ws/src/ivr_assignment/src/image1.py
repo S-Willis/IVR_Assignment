@@ -24,6 +24,12 @@ class image_converter:
     # initialize the bridge between openCV and ROS
     self.bridge = CvBridge()
 
+  def pixels_to_metres(self, image):
+    blue_centre = self.findBlueCentre(image)
+    green_centre = self.findGreenCentre(image)
+    dist = np.sum((blue_centre - green_centre) ** 2)
+    return 3 / np.sqrt(dist)
+
   def findCentre(self, image, lower, upper, colour):
     mask = cv2.inRange(image, lower, upper)
     kernel = np.ones((5, 5), np.uint8)
@@ -46,6 +52,18 @@ class image_converter:
   def findRedCentre(self, image):
     return self.findCentre(image, (0, 0, 40), (30, 30, 255), "redJoint")
 
+  def find_joint_angles(self, image):
+    a = self.pixels_to_metres(image)
+    yellow_centre = a * self.findYellowCentre(image)
+    blue_centre = a * self.findBlueCentre(image)
+    green_centre = a * self.findGreenCentre(image)
+    red_centre = a * self.findRedCentre(image)
+    angle_one = np.arctan2(yellow_centre[0] - blue_centre[0], yellow_centre[1] - blue_centre[1])
+    angle_two = np.arctan2(blue_centre[0] - green_centre[0], blue_centre[1] - green_centre[1]) - angle_one
+    angle_three = np.arctan2(green_centre[0] - red_centre[0], green_centre[1] - red_centre[1]) - angle_two - angle_one
+    print(np.array([angle_one, angle_two, angle_three]))
+    return np.array([angle_one, angle_two, angle_three])
+
   # Recieve data from camera 1, process it, and publish
   def callback1(self, data):
     # Recieve the image
@@ -56,10 +74,7 @@ class image_converter:
     except CvBridgeError as e:
       print(e)
 
-    #print(self.findYellowCentre(self.cv_image1))
-    #print(self.findBlueCentre(self.cv_image1))
-    #print(self.findGreenCentre(self.cv_image1))
-    #print(self.findRedCentre(self.cv_image1))
+    self.find_joint_angles(self.cv_image1)
 
     # Uncomment if you want to save the image
     cv2.imwrite('image_copy_img1.png', self.cv_image1)
