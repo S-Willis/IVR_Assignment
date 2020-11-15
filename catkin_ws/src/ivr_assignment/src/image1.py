@@ -4,6 +4,7 @@ import roslib
 import sys
 import rospy
 import cv2
+import math
 import numpy as np
 from std_msgs.msg import String
 from sensor_msgs.msg import Image
@@ -23,6 +24,10 @@ class image_converter:
     self.image_sub1 = rospy.Subscriber("/camera1/robot/image_raw", Image, self.callback1)
     # initialize the bridge between openCV and ROS
     self.bridge = CvBridge()
+
+    #initialize publishers to send sinusoidal signals to joints
+
+
 
   def pixels_to_metres(self, image):
     blue_centre = self.findBlueCentre(image)
@@ -84,13 +89,25 @@ class image_converter:
     # Publish the results
     try:
       self.image_pub1.publish(self.bridge.cv2_to_imgmsg(self.cv_image1, "bgr8"))
-      # self.image_pub1.publish(self.bridge.cv2_to_imgmsg(img, "bgr8"))
     except CvBridgeError as e:
       print(e)
+
+
+def publish_angle_2(time):
+    angle_pub2 = rospy.Publisher("/robot/joint2_position_controller/command",Float64,queue_size=1)
+    angle2 = (math.pi/2)*math.sin((math.pi/15)*time)
+    joint2 = Float64()
+    joint2.data = angle2
+    angle_pub2.publish(joint2)
+    return
 
 # call the class
 def main(args):
   ic = image_converter()
+  cur_time = rospy.get_time()
+
+  publish_angle_2(cur_time)
+
   try:
     rospy.spin()
   except KeyboardInterrupt:
