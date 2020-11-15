@@ -28,19 +28,22 @@ class image_converter:
   # Recieve data from camera 1, process it, and publish
   def callback1(self,data):
     # Recieve the image
+    # img = self.bridge.imgmsg_to_cv2(data, "bgr8")
     try:
       self.cv_image1 = self.bridge.imgmsg_to_cv2(data, "bgr8")
+
     except CvBridgeError as e:
       print(e)
-    
+
     # Uncomment if you want to save the image
-    #cv2.imwrite('image_copy.png', cv_image)
+    cv2.imwrite('image_copy_img1.png', self.cv_image1)
 
     im1=cv2.imshow('window1', self.cv_image1)
     cv2.waitKey(1)
     # Publish the results
-    try: 
+    try:
       self.image_pub1.publish(self.bridge.cv2_to_imgmsg(self.cv_image1, "bgr8"))
+      # self.image_pub1.publish(self.bridge.cv2_to_imgmsg(img, "bgr8"))
     except CvBridgeError as e:
       print(e)
 
@@ -56,5 +59,3 @@ def main(args):
 # run the code if the node is called
 if __name__ == '__main__':
     main(sys.argv)
-
-
