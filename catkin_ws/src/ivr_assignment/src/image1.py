@@ -49,7 +49,7 @@ class image_converter:
     mask = cv2.dilate(mask, kernel, iterations=3)
     cv2.imwrite(colour+"_C1.png", mask)
     M = cv2.moments(mask)
-    cx = int(M['m10']/M['m00'])
+    cx = int(M['m10']/M['m00']) #Possibly adjust for when joints are obscured from camera view? 
     cy = int(M['m01']/M['m00'])
     return np.array([cx, cy])
 
