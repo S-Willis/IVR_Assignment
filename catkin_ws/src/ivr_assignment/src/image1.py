@@ -20,6 +20,10 @@ class image_converter:
     rospy.init_node('image_processing', anonymous=True)
     # initialize a publisher to send images from camera1 to a topic named image_topic1
     self.image_pub1 = rospy.Publisher("image_topic1", Image, queue_size=1)
+
+    # initialise a publisher to send angles from camera1 to a topic names image1_angles
+    # self.angle_pub1 = rospy.Publisher("image1_angles", Float64MultiArray,queue_size=1)
+
     # initialize a subscriber to recieve messages rom a topic named /robot/camera1/image_raw and use callback function to recieve data
     self.image_sub1 = rospy.Subscriber("/camera1/robot/image_raw", Image, self.callback1)
     # initialize the bridge between openCV and ROS
@@ -49,7 +53,7 @@ class image_converter:
     mask = cv2.dilate(mask, kernel, iterations=3)
     cv2.imwrite(colour+"_C1.png", mask)
     M = cv2.moments(mask)
-    cx = int(M['m10']/M['m00']) #Possibly adjust for when joints are obscured from camera view? 
+    cx = int(M['m10']/M['m00']) #Possibly adjust for when joints are obscured from camera view?
     cy = int(M['m01']/M['m00'])
     return np.array([cx, cy])
 
@@ -71,11 +75,20 @@ class image_converter:
     blue_centre = a * self.findBlueCentre(image)
     green_centre = a * self.findGreenCentre(image)
     red_centre = a * self.findRedCentre(image)
+
+
     angle_one = np.arctan2(yellow_centre[0] - blue_centre[0], yellow_centre[1] - blue_centre[1])
+
     angle_two = np.arctan2(blue_centre[0] - green_centre[0], blue_centre[1] - green_centre[1]) - angle_one
+
     angle_three = np.arctan2(green_centre[0] - red_centre[0], green_centre[1] - red_centre[1]) - angle_two - angle_one
     # print(np.array([angle_one, angle_two, angle_three]))
-    return np.array([angle_one, angle_two, angle_three])
+
+    return_array = Float64MultiArray(data=[angle_one,angle_two,angle_three])
+
+
+    # return np.array([angle_one, angle_two, angle_three])
+    return return_array
 
   # Recieve data from camera 1, process it, and publish
   def callback1(self, data):
@@ -119,14 +132,14 @@ class image_converter:
 
 
 
-def publish_angle_2(time):
-    angle_pub2 = rospy.Publisher("/robot/joint2_position_controller/command",Float64,queue_size=1)
-    angle2 = (math.pi/2)*math.sin((math.pi/15)*time)
-    joint2 = Float64()
-    joint2.data = angle2
-    print(joint2.data)
-    angle_pub2.publish(joint2)
-    return
+# def publish_angle_2(time):
+#     angle_pub2 = rospy.Publisher("/robot/joint2_position_controller/command",Float64,queue_size=1)
+#     angle2 = (math.pi/2)*math.sin((math.pi/15)*time)
+#     joint2 = Float64()
+#     joint2.data = angle2
+#     print(joint2.data)
+#     angle_pub2.publish(joint2)
+#     return
 
 # call the class
 def main(args):

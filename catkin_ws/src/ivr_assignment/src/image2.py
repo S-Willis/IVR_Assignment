@@ -19,6 +19,8 @@ class image_converter:
     rospy.init_node('image_processing', anonymous=True)
     # initialize a publisher to send images from camera2 to a topic named image_topic2
     self.image_pub2 = rospy.Publisher("image_topic2", Image, queue_size=1)
+
+
     # initialize a subscriber to recieve messages rom a topic named /robot/camera1/image_raw and use callback function to recieve data
     self.image_sub2 = rospy.Subscriber("/camera2/robot/image_raw", Image, self.callback2)
     # initialize the bridge between openCV and ROS
@@ -61,8 +63,12 @@ class image_converter:
     angle_one = np.arctan2(yellow_centre[0] - blue_centre[0], yellow_centre[1] - blue_centre[1])
     angle_two = np.arctan2(blue_centre[0] - green_centre[0], blue_centre[1] - green_centre[1]) - angle_one
     angle_three = np.arctan2(green_centre[0] - red_centre[0], green_centre[1] - red_centre[1]) - angle_two - angle_one
-    print(np.array([angle_one, angle_two, angle_three]))
-    return np.array([angle_one, angle_two, angle_three])
+    # print(np.array([angle_one, angle_two, angle_three]))
+
+    return_array = Float64MultiArray(data=[angle_one,angle_two,angle_three])
+
+    # return np.array([angle_one, angle_two, angle_three])
+    return return_array
 
   # Recieve data, process it, and publish
   def callback2(self,data):
@@ -72,12 +78,12 @@ class image_converter:
     except CvBridgeError as e:
       print(e)
 
-    self.find_joint_angles(self.cv_image2)
+
 
     # Uncomment if you want to save the image
-    cv2.imwrite('image_copy_img2.png', self.cv_image)
+    cv2.imwrite('image_copy_img2.png', self.cv_image2)
     #im2=cv2.imshow('window2', self.cv_image2)
-    cv2.waitKey(1)
+    # cv2.waitKey(1)
 
     # Publish the results
     try:

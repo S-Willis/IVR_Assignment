@@ -1,0 +1,101 @@
+#!/usr/bin/env python3
+
+import roslib
+import sys
+import rospy
+import cv2
+import math
+import numpy as np
+from std_msgs.msg import String
+from sensor_msgs.msg import Image
+from std_msgs.msg import Float64MultiArray, Float64
+from cv_bridge import CvBridge, CvBridgeError
+import message_filters
+
+
+class angle_calculator:
+
+    def __init__(self):
+
+        rospy.init_node('angle_calculation', anonymous=True)
+        self.camera1_sub = message_filters.Subscriber("image_topic1",Image)
+        self.camera2_sub = message_filters.Subscriber("image_topic2",Image)
+
+        self.time_sync = message_filters.TimeSynchronizer([self.camera1_sub,self.camera2_sub],10)
+        self.time_sync.registerCallback(self.callback)
+
+        self.bridge = CvBridge()
+
+
+
+    def pixels_to_metres(self, image):
+       blue_centre = self.findBlueCentre(image)
+       green_centre = self.findGreenCentre(image)
+       dist = np.sum((blue_centre - green_centre) ** 2)
+       return 3 / np.sqrt(dist)
+
+    def findCentre(self, image, lower, upper, colour):
+       mask = cv2.inRange(image, lower, upper)
+       kernel = np.ones((5, 5), np.uint8)
+       mask = cv2.dilate(mask, kernel, iterations=3)
+       cv2.imwrite(colour+"_C1.png", mask)
+       M = cv2.moments(mask)
+       cx = int(M['m10']/M['m00']) #Possibly adjust for when joints are obscured from camera view?
+       cy = int(M['m01']/M['m00'])
+       return np.array([cx, cy])
+
+    def findYellowCentre(self, image):
+       return self.findCentre(image, (0, 80, 80), (30, 255, 255), "yellowJoint")
+
+    def findBlueCentre(self, image):
+       return self.findCentre(image, (90, 0, 0), (255, 70, 70), "blueJoint")
+
+    def findGreenCentre(self, image):
+       return self.findCentre(image, (0, 60, 0), (50, 255, 50), "greenJoint")
+
+    def findRedCentre(self, image):
+       return self.findCentre(image, (0, 0, 40), (30, 30, 255), "redJoint")
+
+    def find_joint_angles(self, image):
+       a = self.pixels_to_metres(image)
+       yellow_centre = a * self.findYellowCentre(image)
+       blue_centre = a * self.findBlueCentre(image)
+       green_centre = a * self.findGreenCentre(image)
+       red_centre = a * self.findRedCentre(image)
+
+
+       angle_one = np.arctan2(yellow_centre[0] - blue_centre[0], yellow_centre[1] - blue_centre[1])
+
+       angle_two = np.arctan2(blue_centre[0] - green_centre[0], blue_centre[1] - green_centre[1]) - angle_one
+
+       angle_three = np.arctan2(green_centre[0] - red_centre[0], green_centre[1] - red_centre[1]) - angle_two - angle_one
+
+
+       return np.array([angle_one, angle_two, angle_three])
+
+    def callback(self,camera1_data,camera2_data):
+
+        cam1_angles = self.find_joint_angles(self.bridge.imgmsg_to_cv2(camera1_data,"bgr8")); # needs to be UMat
+        cam2_angles = self.find_joint_angles(self.bridge.imgmsg_to_cv2(camera2_data,"bgr8")); # needs to be UMat
+
+
+
+        print(cam1_angles)
+        print(cam2_angles)
+
+
+        return
+
+def main(args):
+
+    ac = angle_calculator()
+
+    try:
+        rospy.spin()
+    except KeyboardInterrupt:
+        print("Shutting down")
+
+    cv2.destroyAllWindows()
+
+if __name__ == '__main__':
+    main(sys.argv)
