@@ -20,10 +20,6 @@ class image_converter:
     rospy.init_node('image_processing', anonymous=True)
     # initialize a publisher to send images from camera1 to a topic named image_topic1
     self.image_pub1 = rospy.Publisher("image_topic1", Image, queue_size=1)
-
-    # initialise a publisher to send angles from camera1 to a topic names image1_angles
-    # self.angle_pub1 = rospy.Publisher("image1_angles", Float64MultiArray,queue_size=1)
-
     # initialize a subscriber to recieve messages rom a topic named /robot/camera1/image_raw and use callback function to recieve data
     self.image_sub1 = rospy.Subscriber("/camera1/robot/image_raw", Image, self.callback1)
     # initialize the bridge between openCV and ROS
@@ -35,11 +31,11 @@ class image_converter:
     self.robot_joint4_pub = rospy.Publisher("/robot/joint4_position_controller/command",Float64,queue_size=1)
 
   def getAngles(self):
-      time = rospy.get_time()
-      joint2 = (math.pi/2)*math.sin((math.pi/15)*time)
-      joint3 = (math.pi/2)*math.sin((math.pi/18)*time)
-      joint4 = (math.pi/2)*math.sin((math.pi/20)*time)
-      return [joint2,joint3,joint4]
+    time = rospy.get_time()
+    joint2 = (math.pi/2)*math.sin((math.pi/15)*time)
+    joint3 = (math.pi/2)*math.sin((math.pi/18)*time)
+    joint4 = (math.pi/2)*math.sin((math.pi/20)*time)
+    return [joint2, joint3, joint4]
 
   def pixels_to_metres(self, image):
     blue_centre = self.findBlueCentre(image)
@@ -83,12 +79,7 @@ class image_converter:
 
     angle_three = np.arctan2(green_centre[0] - red_centre[0], green_centre[1] - red_centre[1]) - angle_two - angle_one
     # print(np.array([angle_one, angle_two, angle_three]))
-
-    return_array = Float64MultiArray(data=[angle_one,angle_two,angle_three])
-
-
-    # return np.array([angle_one, angle_two, angle_three])
-    return return_array
+    return np.array([angle_one, angle_two, angle_three])
 
   # Recieve data from camera 1, process it, and publish
   def callback1(self, data):
