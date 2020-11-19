@@ -21,12 +21,14 @@ class angle_calculator:
         self.camera1_sub = message_filters.Subscriber("image_topic1",Image)
         self.camera2_sub = message_filters.Subscriber("image_topic2",Image)
 
-        self.angle2_pub = rospy.Publisher("angle2_value",Float64,1)
-        self.angle3_pub = rospy.Publisher("angle3_value",Float64,1)
-        self.angle4_pub = rospy.Publisher("angle4_value",Float64,1)
+        self.angle2_pub = rospy.Publisher("angle2_value",Float64,queue_size=1)
+        self.angle3_pub = rospy.Publisher("angle3_value",Float64,queue_size=1)
+        self.angle4_pub = rospy.Publisher("angle4_value",Float64,queue_size=1)
 
         self.time_sync = message_filters.TimeSynchronizer([self.camera1_sub,self.camera2_sub],10)
         self.time_sync.registerCallback(self.callback)
+
+        self.sphere_img = cv2.imread("sphere_template.png",0)
 
         self.bridge = CvBridge()
 
@@ -77,10 +79,10 @@ class angle_calculator:
 
        return np.array([angle_one, angle_two, angle_three])
 
-    def find_sphere_centre(img):
+    def find_sphere_centre(self,img):
         choice = 'cv2.TM_CCOEFF'
         method = eval(choice)
-        template = cv2.imread('sphere_template.PNG', 0)
+        template = self.sphere_img
         w, h = template.shape[::-1]
 
         res = cv2.matchTemplate(img, template, method)
@@ -122,11 +124,21 @@ class angle_calculator:
 
         print(combinedSphereCentre)
 
-        print(cam1_angles)
-        print(cam2_angles)
 
-        angle2 = cam2_angles[1]
-        angle3 = cam1_angles[1]
+
+        angle2 = Float64()
+        angle2.data = cam1_angles[1]
+        angle3 = Float64()
+        angle3.data = cam2_angles[1]
+
+        print(angle2)
+        print(angle3)
+
+        try:
+            self.angle2_pub.publish(angle2)
+            self.angle3_pub.publish(angle3)
+        except CvBridgeError as e:
+            print(e)
 
         return
 
