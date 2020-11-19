@@ -11,7 +11,7 @@ cv2.imwrite('b&w_image.png', mask)
 M = cv2.moments(mask)
 cx = int(M['m10'] / M['m00'])
 cy = int(M['m01'] / M['m00'])
-print(np.array([cx, cy]))
+#print(np.array([cx, cy]))
 
 shape1 = mask[0:800,
               0:cx].copy()
@@ -38,38 +38,44 @@ shape2_cropped = shape2[shape2_cy - 30:shape2_cy + 30,
 cv2.imwrite('shape1_cropped.png', shape1_cropped)
 cv2.imwrite('shape2_cropped.png', shape2_cropped)
 
-choice = 'cv2.TM_CCOEFF'
-method = eval(choice)
+def find_sphere_centre(img):
+  choice = 'cv2.TM_CCOEFF'
+  method = eval(choice)
+  template = cv2.imread('sphere_template.PNG', 0)
+  # img = cv2.imread('image_copy_img1.png', 0)
+  w, h = template.shape[::-1]
 
-template = cv2.imread('sphere_template.PNG', 0)
-img = cv2.imread('image_copy_img1.png', 0)
-w, h = template.shape[::-1]
+  res = cv2.matchTemplate(img, template, method)
+  min_cal, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+  if method in [cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]:
+    top_left = min_loc
+  else:
+    top_left = max_loc
+  bottom_right = (top_left[0] + w, top_left[1] + h)
 
-res = cv2.matchTemplate(img, template, method)
-min_cal, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-if method in [cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]:
-  top_left = min_loc
-else:
-  top_left = max_loc
-bottom_right = (top_left[0] + w, top_left[1] + h)
+  cv2.rectangle(img, top_left, bottom_right, 0, 2)
 
-cv2.rectangle(img, top_left, bottom_right, 0, 2)
+  # plt.subplot(121), plt.imshow(res, cmap='gray')
+  # plt.title('Matching Result'), plt.xticks([]), plt.yticks([])
+  # plt.subplot(122), plt.imshow(img, cmap='gray')
+  # plt.title('Detected Point'), plt.xticks([]), plt.yticks([])
+  # plt.suptitle(choice)
+  # plt.show()
 
-plt.subplot(121), plt.imshow(res, cmap='gray')
-plt.title('Matching Result'), plt.xticks([]), plt.yticks([])
-plt.subplot(122), plt.imshow(img, cmap='gray')
-plt.title('Detected Point'), plt.xticks([]), plt.yticks([])
-plt.suptitle(choice)
-plt.show()
+  centre_x = int((bottom_right[0] - top_left[0])/2) + top_left[0]
+  centre_y = int((bottom_right[1] - top_left[1])/2) + top_left[1]
+  centre = np.array([centre_x, centre_y])
+  return centre
 
-centre_x = int((bottom_right[0] - top_left[0])/2) + top_left[0]
-centre_y = int((bottom_right[1] - top_left[1])/2) + top_left[1]
-print(centre_x, centre_y)
-sphere_midpoint = (centre_x, centre_y)
+test = cv2.imread('image_copy_img1.png', 0)
+print(find_sphere_centre(test))
 
-originalImage = cv2.imread('image_copy_img1.png', 1)
-cropped = originalImage[centre_y-50:centre_y+50, centre_x-50:centre_x+50].copy()
-cv2.imwrite('final.png', cropped)
+
+
+
+    # original_image = cv2.imread('image_copy_img1.png', 1)
+    # cropped = original_image[centre_y-50:centre_y+50, centre_x-50:centre_x+50].copy()
+    # cv2.imwrite('final.png', cropped)
 
 
 
