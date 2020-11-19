@@ -77,20 +77,56 @@ class angle_calculator:
 
        return np.array([angle_one, angle_two, angle_three])
 
-    def callback(self,camera1_data,camera2_data):
+    def find_sphere_centre(img):
+        choice = 'cv2.TM_CCOEFF'
+        method = eval(choice)
+        template = cv2.imread('sphere_template.PNG', 0)
+        w, h = template.shape[::-1]
 
-        cam1_angles = self.find_joint_angles(self.bridge.imgmsg_to_cv2(camera1_data,"bgr8")); # needs to be UMat
-        cam2_angles = self.find_joint_angles(self.bridge.imgmsg_to_cv2(camera2_data,"bgr8")); # needs to be UMat
+        res = cv2.matchTemplate(img, template, method)
+        min_cal, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+        if method in [cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]:
+            top_left = min_loc
+        else:
+            top_left = max_loc
+        bottom_right = (top_left[0] + w, top_left[1] + h)
 
+        cv2.rectangle(img, top_left, bottom_right, 0, 2)
+
+        # plt.subplot(121), plt.imshow(res, cmap='gray')
+        # plt.title('Matching Result'), plt.xticks([]), plt.yticks([])
+        # plt.subplot(122), plt.imshow(img, cmap='gray')
+        # plt.title('Detected Point'), plt.xticks([]), plt.yticks([])
+        # plt.suptitle(choice)
+        # plt.show()
+
+        centre_x = int((bottom_right[0] - top_left[0]) / 2) + top_left[0]
+        centre_y = int((bottom_right[1] - top_left[1]) / 2) + top_left[1]
+        centre = np.array([centre_x, centre_y])
+        return centre
+
+    def callback(self, camera1_data, camera2_data):
+
+        cam1_angles = self.find_joint_angles(self.bridge.imgmsg_to_cv2(camera1_data, "bgr8"))  # needs to be UMat
+        cam2_angles = self.find_joint_angles(self.bridge.imgmsg_to_cv2(camera2_data, "bgr8"))  # needs to be UMat
+
+        cam1_sphere_centre = self.find_sphere_centre(self.bridge.imgmsg_to_cv2(camera1_data, "bgr8"))
+        cam2_sphere_centre = self.find_sphere_centre(self.bridge.imgmsg_to_cv2(camera2_data, "bgr8"))
+
+        a = self.pixels_to_metres(self.bridge.imgmsg_to_cv2(camera1_data, "bgr8"))
+        b = self.pixels_to_metres(self.bridge.imgmsg_to_cv2(camera2_data, "bgr8"))
+        x = b * cam2_sphere_centre[0]
+        y = a * cam1_sphere_centre[0]
+        z = a * cam1_sphere_centre[1]
+        combinedSphereCentre = np.array([x, y, z])
+
+        print(combinedSphereCentre)
 
         print(cam1_angles)
         print(cam2_angles)
 
         angle2 = cam2_angles[1]
         angle3 = cam1_angles[1]
-
-
-
 
         return
 
