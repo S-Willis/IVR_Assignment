@@ -21,6 +21,10 @@ class angle_calculator:
         self.camera1_sub = message_filters.Subscriber("image_topic1",Image)
         self.camera2_sub = message_filters.Subscriber("image_topic2",Image)
 
+        self.angle2_pub = rospy.Publisher("angle2_value",Float64,1)
+        self.angle3_pub = rospy.Publisher("angle3_value",Float64,1)
+        self.angle4_pub = rospy.Publisher("angle4_value",Float64,1)
+
         self.time_sync = message_filters.TimeSynchronizer([self.camera1_sub,self.camera2_sub],10)
         self.time_sync.registerCallback(self.callback)
 
@@ -79,9 +83,13 @@ class angle_calculator:
         cam2_angles = self.find_joint_angles(self.bridge.imgmsg_to_cv2(camera2_data,"bgr8")); # needs to be UMat
 
 
-
         print(cam1_angles)
         print(cam2_angles)
+
+        angle2 = cam2_angles[1]
+        angle3 = cam1_angles[1]
+
+
 
 
         return
