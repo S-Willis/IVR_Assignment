@@ -3,7 +3,7 @@ rqt_plt /robot/joint2_position_controller/command angle2_value
 
 
 cd src/ivr_assignment/src
-chmod +x image1.py image2.py target_move.py angle_calc.py
+chmod +x image1.py image2.py target_move.py angle_calc.py photo_capture.py
 cd ../../..
 catkin_make
 source /opt/ros/noetic/setup.bash
