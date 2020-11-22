@@ -137,8 +137,8 @@ class angle_calculator:
         angle3 = Float64()
         angle3.data = cam2_angles[1]
 
-        print(angle2)
-        print(angle3)
+        # print(angle2)
+        # print(angle3)
 
         try:
             self.angle2_pub.publish(angle2)
