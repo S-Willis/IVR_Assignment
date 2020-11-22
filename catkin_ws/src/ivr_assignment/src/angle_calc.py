@@ -5,6 +5,7 @@ import sys
 import rospy
 import cv2
 import math
+import os
 import numpy as np
 from std_msgs.msg import String
 from sensor_msgs.msg import Image
@@ -28,7 +29,9 @@ class angle_calculator:
         self.time_sync = message_filters.TimeSynchronizer([self.camera1_sub,self.camera2_sub],10)
         self.time_sync.registerCallback(self.callback)
 
-        self.sphere_img = cv2.imread("sphere_template.png",0)
+        filepath = os.path.join(sys.path[0],"sphere_template.png")
+
+        self.sphere_img = cv2.imread(filepath,0)
 
         self.bridge = CvBridge()
 
@@ -83,9 +86,11 @@ class angle_calculator:
         choice = 'cv2.TM_CCOEFF'
         method = eval(choice)
         template = self.sphere_img
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
         w, h = template.shape[::-1]
 
-        res = cv2.matchTemplate(img, template, method)
+        res = cv2.matchTemplate(gray, template, method)
         min_cal, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
         if method in [cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]:
             top_left = min_loc
@@ -108,6 +113,7 @@ class angle_calculator:
         return centre
 
     def callback(self, camera1_data, camera2_data):
+
 
         cam1_angles = self.find_joint_angles(self.bridge.imgmsg_to_cv2(camera1_data, "bgr8"))  # needs to be UMat
         cam2_angles = self.find_joint_angles(self.bridge.imgmsg_to_cv2(camera2_data, "bgr8"))  # needs to be UMat
