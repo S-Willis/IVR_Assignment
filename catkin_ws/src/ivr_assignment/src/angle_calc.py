@@ -114,9 +114,28 @@ class angle_calculator:
 
     def callback(self, camera1_data, camera2_data):
 
+        cam1_image = self.bridge.imgmsg_to_cv2(camera1_data, "bgr8")
+        cam2_image = self.bridge.imgmsg_to_cv2(camera2_data, "bgr8")
 
-        cam1_angles = self.find_joint_angles(self.bridge.imgmsg_to_cv2(camera1_data, "bgr8"))  # needs to be UMat
-        cam2_angles = self.find_joint_angles(self.bridge.imgmsg_to_cv2(camera2_data, "bgr8"))  # needs to be UMat
+        cam1_yellow = self.findYellowCentre(cam1_image)
+        cam2_yellow = self.findYellowCentre(cam2_image)
+        yellow_centre = np.array([cam2_yellow[0]], cam1_yellow[0], cam1_yellow[1])
+
+        cam1_blue = self.findBlueCentre(cam1_image)
+        cam2_blue = self.findBlueCentre(cam2_image)
+        blue_centre = np.array([cam2_blue[0], cam1_blue[0], cam1_blue[1]])
+
+        cam1_green = self.findGreenCentre(cam1_image)
+        cam2_green = self.findGreenCentre(cam2_image)
+        green_centre = np.array([cam2_green[0], cam1_green[0], cam1_green[1]])
+
+        cam1_red = self.findRedCentre(cam1_image)
+        cam2_red = self.findRedCentre(cam2_image)
+        red_centre = np.array([cam2_red[0], cam1_red[0], cam1_red[1]])
+
+
+        # cam1_angles = self.find_joint_angles(self.bridge.imgmsg_to_cv2(camera1_data, "bgr8"))  # needs to be UMat
+        # cam2_angles = self.find_joint_angles(self.bridge.imgmsg_to_cv2(camera2_data, "bgr8"))  # needs to be UMat
 
         cam1_sphere_centre = self.find_sphere_centre(self.bridge.imgmsg_to_cv2(camera1_data, "bgr8"))
         cam2_sphere_centre = self.find_sphere_centre(self.bridge.imgmsg_to_cv2(camera2_data, "bgr8"))

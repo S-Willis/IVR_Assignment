@@ -70,9 +70,6 @@ def find_sphere_centre(img):
 test = cv2.imread('image_copy_img1.png', 0)
 print(find_sphere_centre(test))
 
-
-
-
     # original_image = cv2.imread('image_copy_img1.png', 1)
     # cropped = original_image[centre_y-50:centre_y+50, centre_x-50:centre_x+50].copy()
     # cv2.imwrite('final.png', cropped)
