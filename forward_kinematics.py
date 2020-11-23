@@ -1,6 +1,12 @@
 import math
 import numpy as np
 
+def get_xyz(a_matrix):
+    x = a_matrix[0,3]
+    y = a_matrix[1,3]
+    z = a_matrix[2,3]
+
+    return [x,y,z]
 
 def get_a(link):
     d = link[0]
@@ -38,15 +44,16 @@ def forward_kinematics(angle1, angle2, angle3, angle4):
 
     for i in range(4):
         mat_list[i] = get_a(link_list[i])
+        print(mat_list[i])
 
     A02 = np.matmul(mat_list[0],mat_list[1])
     A03 = np.matmul(A02,mat_list[2])
     A04 = np.matmul(A03,mat_list[3])
 
-    return A04
+    return get_xyz(A04)
 
 def main():
-    print(forward_kinematics(0,1,-1,0))
+    print(forward_kinematics(0,0,0,0))
 
 if __name__ == '__main__':
     main()
