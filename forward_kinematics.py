@@ -29,14 +29,11 @@ def get_a(link):
     return A
 
 def forward_kinematics(angle1, angle2, angle3, angle4):
-    theta1 = angle1
-    theta2 = angle2
-    theta3 = angle3
-    theta4 = angle4
-    link1 = [2.5, theta1,0,0]
+    
+    link1 = [2.5, angle1,0,0]
     link2 = [3.5,angle2,0,-math.pi/2]
     link3 = [3.5,angle3,0,math.pi/2]
-    link4 = [0,theta4,3.0,math.pi/2]
+    link4 = [0,angle4,3.0,math.pi/2]
 
     link_list = [link1,link2,link3,link4];
 
