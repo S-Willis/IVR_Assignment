@@ -60,49 +60,49 @@ class angle_calculator:
        M = cv2.moments(mask)
 
        if(M['m00']==0):
-		       if colour == "redJoint":
-				       if camera == 1:
-						       cx = self.lastRedPositionCam1[0]
-						       cy = self.lastRedPositionCam1[1]
-						   else:
-								   cx = self.lastRedPositionCam2[0]
-								   cy = self.lastRedPositionCam2[1]
-		       elif colour == "greenJoint":
-				       if camera == 1:
-				           cx = self.lastGreenPositionCam1[0]
-				           cy = self.lastGreenPositionCam1[1]
-				       else:
-				           cx = self.lastGreenPositionCam2[0]
-						       cy = self.lastGreenPositionCam2[1]
+           if colour == "redJoint":
+               if camera == 1:
+                   cx = self.lastRedPositionCam1[0]
+                   cy = self.lastRedPositionCam1[1]
+               else:
+                   cx = self.lastRedPositionCam2[0]
+                   cy = self.lastRedPositionCam2[1]
+           elif colour == "greenJoint":
+               if camera == 1:
+                   cx = self.lastGreenPositionCam1[0]
+                   cy = self.lastGreenPositionCam1[1]
+               else:
+                   cx = self.lastGreenPositionCam2[0]
+                   cy = self.lastGreenPositionCam2[1]
            elif colour == "blueJoint":
-	             if camera == 1:
-			             cx = self.lastBluePositionCam1[0]
-			             cy = self.lastBluePositionCam1[1]
-			         if camera == 2:
-			             cx = self.lastBluePosition[0]
-			             cy = self.lastBluePosition[1]
-			     else:
+               if camera == 1:
+                   cx = self.lastBluePositionCam1[0]
+                   cy = self.lastBluePositionCam1[1]
+               else:
+                   cx = self.lastBluePosition[0]
+			       cy = self.lastBluePosition[1]
+           else:
                cx = 0
                cy = 0
        else:
-          cx = int(M['m10']/M['m00']) #Possibly adjust for when joints are obscured from camera view?
-          cy = int(M['m01']/M['m00'])
+           cx = int(M['m10']/M['m00'])
+           cy = int(M['m01']/M['m00'])
 
 
 		   if colour == "redJoint":
-		       if camera == 1:
-					     self.lastRedPositionCam1 = np.array([cx, cy])
-				   else:
-				       self.lastRedPositionCam2 = np.array([cx, cy])
-		   elif colour == "greenJoint":
-           if camera == 1:
+               if camera == 1:
+                   self.lastRedPositionCam1 = np.array([cx, cy])
+               else:
+                   self.lastRedPositionCam2 = np.array([cx, cy])
+           elif colour == "greenJoint":
+               if camera == 1:
 		           self.lastGreenPositionCam1 = np.array([cx, cy])
 		       else:
 		           self.lastGreenPositionCam2 = np.array([cx, cy])
-       elif colour == "blueJoint":
-	         if camera == 1:
+           elif colour == "blueJoint":
+               if camera == 1:
 		           self.lastBluePositionCam1 = np.array([cx, cy])
-		       if camera == 2:
+		       if else:
 		           self.lastBluePositionCam2 = np.array([cx, cy])
 
        return np.array([cx, cy])
