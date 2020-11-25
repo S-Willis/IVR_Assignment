@@ -35,6 +35,13 @@ class angle_calculator:
 
         self.bridge = CvBridge()
 
+		    self.lastBluePositionCam1 = None
+		    self.lastGreenPositionCam1 = None
+		    self.lastRedPositionCam1 = None
+
+		    self.lastBluePositionCam2 = None
+		    self.lastGreenPositionCam2 = None
+		    self.lastRedPositionCam2 = None
 
 
     def pixel2meter(self,image):
@@ -45,7 +52,7 @@ class angle_calculator:
 
     	return metres0
 
-    def findCentre(self, image, lower, upper, colour):
+    def findCentre(self, image, lower, upper, colour, camera):
        mask = cv2.inRange(image, lower, upper)
        kernel = np.ones((5, 5), np.uint8)
        mask = cv2.dilate(mask, kernel, iterations=3)
@@ -53,26 +60,64 @@ class angle_calculator:
        M = cv2.moments(mask)
 
        if(M['m00']==0):
-           cx = 399
-           cy = 399
+		       if colour == "redJoint":
+				       if camera == 1:
+						       cx = self.lastRedPositionCam1[0]
+						       cy = self.lastRedPositionCam1[1]
+						   else:
+								   cx = self.lastRedPositionCam2[0]
+								   cy = self.lastRedPositionCam2[1]
+		       elif colour == "greenJoint":
+				       if camera == 1:
+				           cx = self.lastGreenPositionCam1[0]
+				           cy = self.lastGreenPositionCam1[1]
+				       else:
+				           cx = self.lastGreenPositionCam2[0]
+						       cy = self.lastGreenPositionCam2[1]
+           elif colour == "blueJoint":
+	             if camera == 1:
+			             cx = self.lastBluePositionCam1[0]
+			             cy = self.lastBluePositionCam1[1]
+			         if camera == 2:
+			             cx = self.lastBluePosition[0]
+			             cy = self.lastBluePosition[1]
+			     else:
+               cx = 0
+               cy = 0
        else:
-           cx = int(M['m10']/M['m00']) #Possibly adjust for when joints are obscured from camera view?
-           cy = int(M['m01']/M['m00'])
+          cx = int(M['m10']/M['m00']) #Possibly adjust for when joints are obscured from camera view?
+          cy = int(M['m01']/M['m00'])
 
+
+		   if colour == "redJoint":
+		       if camera == 1:
+					     self.lastRedPositionCam1 = np.array([cx, cy])
+				   else:
+				       self.lastRedPositionCam2 = np.array([cx, cy])
+		   elif colour == "greenJoint":
+           if camera == 1:
+		           self.lastGreenPositionCam1 = np.array([cx, cy])
+		       else:
+		           self.lastGreenPositionCam2 = np.array([cx, cy])
+       elif colour == "blueJoint":
+	         if camera == 1:
+		           self.lastBluePositionCam1 = np.array([cx, cy])
+		       if camera == 2:
+		           self.lastBluePositionCam2 = np.array([cx, cy])
 
        return np.array([cx, cy])
 
-    def findYellowCentre(self, image):
+    def findYellowCentre(self, image, camera):
        return self.findCentre(image, (0, 80, 80), (30, 255, 255), "yellowJoint")
 
-    def findBlueCentre(self, image):
-       return self.findCentre(image, (90, 0, 0), (255, 70, 70), "blueJoint")
+    def findBlueCentre(self, image, camera):
+       return self.findCentre(image, (90, 0, 0), (255, 70, 70), "blueJoint", camera)
 
-    def findGreenCentre(self, image):
-       return self.findCentre(image, (0, 60, 0), (50, 255, 50), "greenJoint")
+    def findGreenCentre(self, image, camera):
+       return self.findCentre(image, (0, 60, 0), (50, 255, 50), "greenJoint", camera)
 
-    def findRedCentre(self, image):
-       return self.findCentre(image, (0, 0, 40), (30, 30, 255), "redJoint")
+    def findRedCentre(self, image, camera):
+       return self.findCentre(image, (0, 0, 40), (30, 30, 255), "redJoint", camera)
 
     def getAngle3D(self,coord1, coord2):
     	coord1_u = coord1/np.linalg.norm(coord1)
@@ -100,20 +145,20 @@ class angle_calculator:
 
     def getAngles(self,cam1_image,cam2_image,conversion):
 
-    	cam1_yellow = conversion * self.findYellowCentre(cam1_image)
-    	cam1_blue = conversion * self.findBlueCentre(cam1_image)
-    	cam1_green = conversion * self.findGreenCentre(cam1_image)
-    	cam1_red = conversion * self.findRedCentre(cam1_image)
+    	cam1_yellow = conversion * self.findYellowCentre(cam1_image, 1)
+    	cam1_blue = conversion * self.findBlueCentre(cam1_image, 1)
+    	cam1_green = conversion * self.findGreenCentre(cam1_image, 1)
+    	cam1_red = conversion * self.findRedCentre(cam1_image, 1)
     	# print("Camera 1 centres:")
     	# print(cam1_yellow)
     	# print(cam1_blue)
     	# print(cam1_green)
     	# print(cam1_red)
 
-    	cam2_yellow = conversion*self.findYellowCentre(cam2_image)
-    	cam2_blue = conversion*self.findBlueCentre(cam2_image)
-    	cam2_green = conversion*self.findGreenCentre(cam2_image)
-    	cam2_red = conversion*self.findRedCentre(cam2_image)
+    	cam2_yellow = conversion*self.findYellowCentre(cam2_image, 2)
+    	cam2_blue = conversion*self.findBlueCentre(cam2_image, 2)
+    	cam2_green = conversion*self.findGreenCentre(cam2_image, 2)
+    	cam2_red = conversion*self.findRedCentre(cam2_image, 2)
 
 
     	# print("Camera 2 centres:")
