@@ -177,7 +177,7 @@ class angle_calculator:
 
 
     	angle2 = ((angley-drift2) - math.pi/2)
-    	angle3 = math.pi/2 - (anglex-drift3)
+    	angle3 = math.pi/2 - (anglex+drift3)
 
     	green2red = self.getVector(green_xyz,red_xyz)
     	angle4 = self.getAngle3D(green2red,blue2green) - drift4

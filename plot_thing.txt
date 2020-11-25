@@ -1,4 +1,4 @@
-rqt_plot /robot/joint2_position_controller/command angle2_value
+rqt_plot /robot/joint3_position_controller/command angle3_value
 
 
 
