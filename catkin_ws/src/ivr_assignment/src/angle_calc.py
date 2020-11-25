@@ -35,18 +35,18 @@ class angle_calculator:
 
         self.bridge = CvBridge()
 
-		    self.lastBluePositionCam1 = None
-		    self.lastGreenPositionCam1 = None
-		    self.lastRedPositionCam1 = None
+        self.lastBluePositionCam1 = None
+        self.lastGreenPositionCam1 = None
+        self.lastRedPositionCam1 = None
 
-		    self.lastBluePositionCam2 = None
-		    self.lastGreenPositionCam2 = None
-		    self.lastRedPositionCam2 = None
+        self.lastBluePositionCam2 = None
+        self.lastGreenPositionCam2 = None
+        self.lastRedPositionCam2 = None
 
 
-    def pixel2meter(self,image):
-    	circle0Pos = self.findYellowCentre(image)
-    	circle1Pos = self.findBlueCentre(image)
+    def pixel2meter(self,image,camera):
+    	circle0Pos = self.findYellowCentre(image,camera)
+    	circle1Pos = self.findBlueCentre(image,camera)
     	dist0 = np.sum((circle0Pos-circle1Pos)**2)
     	metres0 = 2.5/np.sqrt(dist0)
 
@@ -80,7 +80,7 @@ class angle_calculator:
                    cy = self.lastBluePositionCam1[1]
                else:
                    cx = self.lastBluePosition[0]
-			       cy = self.lastBluePosition[1]
+                   cy = self.lastBluePosition[1]
            else:
                cx = 0
                cy = 0
@@ -88,27 +88,26 @@ class angle_calculator:
            cx = int(M['m10']/M['m00'])
            cy = int(M['m01']/M['m00'])
 
-
-		   if colour == "redJoint":
-               if camera == 1:
-                   self.lastRedPositionCam1 = np.array([cx, cy])
-               else:
-                   self.lastRedPositionCam2 = np.array([cx, cy])
-           elif colour == "greenJoint":
-               if camera == 1:
-		           self.lastGreenPositionCam1 = np.array([cx, cy])
-		       else:
-		           self.lastGreenPositionCam2 = np.array([cx, cy])
-           elif colour == "blueJoint":
-               if camera == 1:
-		           self.lastBluePositionCam1 = np.array([cx, cy])
-		       if else:
-		           self.lastBluePositionCam2 = np.array([cx, cy])
+       if colour == "redJoint":
+           if camera == 1:
+               self.lastRedPositionCam1 = np.array([cx, cy])
+           else:
+               self.lastRedPositionCam2 = np.array([cx, cy])
+       elif colour == "greenJoint":
+           if camera == 1:
+               self.lastGreenPositionCam1 = np.array([cx, cy])
+           else:
+               self.lastGreenPositionCam2 = np.array([cx, cy])
+       elif colour == "blueJoint":
+           if camera == 1:
+               self.lastBluePositionCam1 = np.array([cx, cy])
+           else:
+               self.lastBluePositionCam2 = np.array([cx, cy])
 
        return np.array([cx, cy])
 
     def findYellowCentre(self, image, camera):
-       return self.findCentre(image, (0, 80, 80), (30, 255, 255), "yellowJoint")
+       return self.findCentre(image, (0, 80, 80), (30, 255, 255), "yellowJoint",camera)
 
     def findBlueCentre(self, image, camera):
        return self.findCentre(image, (90, 0, 0), (255, 70, 70), "blueJoint", camera)
@@ -283,8 +282,8 @@ class angle_calculator:
         cam1_sphere_centre = self.find_sphere_centre(cam1_image)
         cam2_sphere_centre = self.find_sphere_centre(cam2_image)
 
-        a = self.pixel2meter(cam1_image)
-        b = self.pixel2meter(cam2_image)
+        a = self.pixel2meter(cam1_image,1)
+        b = self.pixel2meter(cam2_image,2)
         x = b * cam2_sphere_centre[0]
         y = a * cam1_sphere_centre[0]
         z = a * cam1_sphere_centre[1]
