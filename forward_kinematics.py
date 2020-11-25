@@ -36,7 +36,7 @@ def forward_kinematics(angle1, angle2, angle3, angle4):
     link1 = [2.5, theta1,0,0]
     link2 = [0,theta2,0,-math.pi/2]
     link3 = [3.5,theta3,0,math.pi/2]
-    link4 = [3.0,theta4,0,-math.pi/2]
+    link4 = [3.0,theta4,0,math.pi/2]
 
     link_list = [link1,link2,link3,link4];
 
@@ -44,10 +44,18 @@ def forward_kinematics(angle1, angle2, angle3, angle4):
 
     for i in range(4):
         mat_list[i] = get_a(link_list[i])
-        print(mat_list[i])
+        # print(mat_list[i])
+    print(mat_list[0])
+    print()
+    print(mat_list[2])
+    print()
 
     A02 = np.matmul(mat_list[0],mat_list[1])
+    print(A02)
+    print()
     A03 = np.matmul(A02,mat_list[2])
+    print(A03)
+    print()
     A04 = np.matmul(A03,mat_list[3])
 
     return get_xyz(A04)

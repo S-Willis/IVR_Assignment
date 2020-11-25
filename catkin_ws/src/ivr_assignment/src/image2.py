@@ -26,49 +26,6 @@ class image_converter:
     # initialize the bridge between openCV and ROS
     self.bridge = CvBridge()
 
-  def pixels_to_metres(self, image):
-    blue_centre = self.findBlueCentre(image)
-    green_centre = self.findGreenCentre(image)
-    dist = np.sum((blue_centre - green_centre) ** 2)
-    return 3 / np.sqrt(dist)
-
-  def findCentre(self, image, lower, upper, colour):
-    mask = cv2.inRange(image, lower, upper)
-    kernel = np.ones((5, 5), np.uint8)
-    mask = cv2.dilate(mask, kernel, iterations=3)
-    cv2.imwrite(colour+"_C2.png", mask)
-    M = cv2.moments(mask)
-    cx = int(M['m10']/M['m00'])
-    cy = int(M['m01']/M['m00'])
-    return np.array([cx, cy])
-
-  def findYellowCentre(self, image):
-    return self.findCentre(image, (0, 80, 80), (30, 255, 255), "yellowJoint")
-
-  def findBlueCentre(self, image):
-    return self.findCentre(image, (90, 0, 0), (255, 70, 70), "blueJoint")
-
-  def findGreenCentre(self, image):
-    return self.findCentre(image, (0, 60, 0), (50, 255, 50), "greenJoint")
-
-  def findRedCentre(self, image):
-    return self.findCentre(image, (0, 0, 40), (30, 30, 255), "redJoint")
-
-  def find_joint_angles(self, image):
-    a = self.pixels_to_metres(image)
-    yellow_centre = a * self.findYellowCentre(image)
-    blue_centre = a * self.findBlueCentre(image)
-    green_centre = a * self.findGreenCentre(image)
-    red_centre = a * self.findRedCentre(image)
-    angle_one = np.arctan2(yellow_centre[0] - blue_centre[0], yellow_centre[1] - blue_centre[1])
-    angle_two = np.arctan2(blue_centre[0] - green_centre[0], blue_centre[1] - green_centre[1]) - angle_one
-    angle_three = np.arctan2(green_centre[0] - red_centre[0], green_centre[1] - red_centre[1]) - angle_two - angle_one
-    # print(np.array([angle_one, angle_two, angle_three]))
-
-    return_array = Float64MultiArray(data=[angle_one,angle_two,angle_three])
-
-    # return np.array([angle_one, angle_two, angle_three])
-    return return_array
 
   # Recieve data, process it, and publish
   def callback2(self,data):

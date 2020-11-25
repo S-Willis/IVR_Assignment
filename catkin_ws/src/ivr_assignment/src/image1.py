@@ -26,9 +26,9 @@ class image_converter:
     self.bridge = CvBridge()
 
     #initialize publishers to send sinusoidal signals to joints
-    self.robot_joint2_pub = rospy.Publisher("/robot/joint2_position_controller/command",Float64,queue_size=1)
-    self.robot_joint3_pub = rospy.Publisher("/robot/joint3_position_controller/command",Float64,queue_size=1)
-    self.robot_joint4_pub = rospy.Publisher("/robot/joint4_position_controller/command",Float64,queue_size=1)
+    self.robot_joint2_pub = rospy.Publisher("/robot/joint2_position_controller/command",Float64,queue_size=10)
+    self.robot_joint3_pub = rospy.Publisher("/robot/joint3_position_controller/command",Float64,queue_size=10)
+    self.robot_joint4_pub = rospy.Publisher("/robot/joint4_position_controller/command",Float64,queue_size=10)
 
   def getAngles(self):
     time = rospy.get_time()
@@ -37,49 +37,6 @@ class image_converter:
     joint4 = (math.pi/2)*math.sin((math.pi/20)*time)
     return [joint2, joint3, joint4]
 
-  def pixels_to_metres(self, image):
-    blue_centre = self.findBlueCentre(image)
-    green_centre = self.findGreenCentre(image)
-    dist = np.sum((blue_centre - green_centre) ** 2)
-    return 3 / np.sqrt(dist)
-
-  def findCentre(self, image, lower, upper, colour):
-    mask = cv2.inRange(image, lower, upper)
-    kernel = np.ones((5, 5), np.uint8)
-    mask = cv2.dilate(mask, kernel, iterations=3)
-    cv2.imwrite(colour+"_C1.png", mask)
-    M = cv2.moments(mask)
-    cx = int(M['m10']/M['m00']) #Possibly adjust for when joints are obscured from camera view?
-    cy = int(M['m01']/M['m00'])
-    return np.array([cx, cy])
-
-  def findYellowCentre(self, image):
-    return self.findCentre(image, (0, 80, 80), (30, 255, 255), "yellowJoint")
-
-  def findBlueCentre(self, image):
-    return self.findCentre(image, (90, 0, 0), (255, 70, 70), "blueJoint")
-
-  def findGreenCentre(self, image):
-    return self.findCentre(image, (0, 60, 0), (50, 255, 50), "greenJoint")
-
-  def findRedCentre(self, image):
-    return self.findCentre(image, (0, 0, 40), (30, 30, 255), "redJoint")
-
-  def find_joint_angles(self, image):
-    a = self.pixels_to_metres(image)
-    yellow_centre = a * self.findYellowCentre(image)
-    blue_centre = a * self.findBlueCentre(image)
-    green_centre = a * self.findGreenCentre(image)
-    red_centre = a * self.findRedCentre(image)
-
-
-    angle_one = np.arctan2(yellow_centre[0] - blue_centre[0], yellow_centre[1] - blue_centre[1])
-
-    angle_two = np.arctan2(blue_centre[0] - green_centre[0], blue_centre[1] - green_centre[1]) - angle_one
-
-    angle_three = np.arctan2(green_centre[0] - red_centre[0], green_centre[1] - red_centre[1]) - angle_two - angle_one
-    # print(np.array([angle_one, angle_two, angle_three]))
-    return np.array([angle_one, angle_two, angle_three])
 
   # Recieve data from camera 1, process it, and publish
   def callback1(self, data):
@@ -91,7 +48,7 @@ class image_converter:
     except CvBridgeError as e:
       print(e)
 
-    self.find_joint_angles(self.cv_image1)
+    # self.find_joint_angles(self.cv_image1)
 
     # Uncomment if you want to save the image
     cv2.imwrite('image_copy_img1.png', self.cv_image1)
