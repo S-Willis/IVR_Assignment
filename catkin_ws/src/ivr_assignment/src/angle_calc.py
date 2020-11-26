@@ -288,12 +288,24 @@ class angle_calculator:
 
         a = self.pixel2meter(cam1_image,1)
         b = self.pixel2meter(cam2_image,2)
-        x = b * cam2_sphere_centre[0]
-        y = a * cam1_sphere_centre[0]
-        z = a * cam1_sphere_centre[1]
-        combinedSphereCentre = np.array([x, y, z])
+        # x = b * cam2_sphere_centre[0]
+        # y = a * cam1_sphere_centre[0]
+        # z = a * cam1_sphere_centre[1]
+        # combinedSphereCentre = np.array([x, y, z])
 
         # print(combinedSphereCentre)
+
+        yellowJointCentre1 = self.findYellowCentre(cam1_image,1)
+        yellowJointCentre2 = self.findYellowCentre(cam2_image,2)
+
+        [s_x,s_z1] = self.getDifference(yellowJointCentre1,cam1_sphere_centre)
+        [s_y,s_z2] = self.getDifference(yellowJointCentre2,cam2_sphere_centre)
+
+        x = (s_x * (b*5/6)) + 0.5
+        y = (s_y * a) - 0.5
+        z = -(a*(s_z1+s_z2)/2)
+
+
 
         joint_angles = self.getAngles(cam1_image,cam2_image,a)
 
