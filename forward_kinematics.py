@@ -30,10 +30,24 @@ def get_a(link):
 
 def forward_kinematics(angle1, angle2, angle3, angle4):
 
-    link1 = [2.5, angle1,0,0]
-    link2 = [3.5,angle2,0,-math.pi/2]
-    link3 = [3.5,angle3,0,math.pi/2]
-    link4 = [0,angle4,3.0,math.pi/2]
+    # link = [d , theta, r , alpha]
+
+    link1 = [2.5, angle1, 0, 0]
+    link2 = [0, angle2+(math.pi/2+angle1), 0, math.pi/2]
+    link3 = [0, angle3+math.pi/2-angle2, 3.5, -math.pi/2]
+    link4 = [0, angle3 + angle4, 3, -math.pi/2]
+
+    #right results - [0.0, 0.0, 9.0]
+    # link1 = [2.5, angle1,0,0]
+    # link2 = [3.5,angle2,0,math.pi/2]
+    # link3 = [0,angle3,0,-math.pi/2]
+    # link4 = [3,angle4,0,math.pi/2]
+
+    #okay results - [9.0, 0.0, 0.0]
+    # link1 = [0, angle1,2.5,0]
+    # link2 = [0,angle2,0,math.pi/2]
+    # link3 = [0,angle3,3.5,-math.pi/2]
+    # link4 = [0,angle4,3.0,math.pi/2]
 
     link_list = [link1,link2,link3,link4];
 
@@ -54,11 +68,12 @@ def forward_kinematics(angle1, angle2, angle3, angle4):
     print(A03)
     print()
     A04 = np.matmul(A03,mat_list[3])
+    print(A04)
 
     return get_xyz(A04)
 
 def main():
-    print(forward_kinematics(0,0,0,0))
+    print(forward_kinematics(0,math.pi/2,0,0))
 
 if __name__ == '__main__':
     main()
