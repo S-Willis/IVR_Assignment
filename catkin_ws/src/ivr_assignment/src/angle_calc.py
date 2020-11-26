@@ -26,6 +26,10 @@ class angle_calculator:
         self.angle3_pub = rospy.Publisher("angle3_value",Float64,queue_size=1)
         self.angle4_pub = rospy.Publisher("angle4_value",Float64,queue_size=1)
 
+        self.spherex_pub = rospy.Publisher("spherex",Float64,queue_size=1)
+        self.spherey_pub = rospy.Publisher("spherey",Float64,queue_size=1)
+        self.spherez_pub = rospy.Publisher("spherez",Float64,queue_size=1)
+
         self.time_sync = message_filters.TimeSynchronizer([self.camera1_sub,self.camera2_sub],1)
         self.time_sync.registerCallback(self.callback)
 
@@ -302,10 +306,21 @@ class angle_calculator:
         angle4 = Float64()
         angle4.data = joint_angles[3]
 
+        sphere_x = Float64()
+        sphere_x.data = x
+        sphere_y = Float64()
+        sphere_y.data = y
+        sphere_z = Float64()
+        sphere_z.data = z
+
         try:
             self.angle2_pub.publish(angle2)
             self.angle3_pub.publish(angle3)
             self.angle4_pub.publish(angle4)
+
+            self.spherex_pub.publish(sphere_x)
+            self.spherey_pub.publish(sphere_y)
+            self.spherez_pub.publish(sphere_z)
         except CvBridgeError as e:
             print(e)
 

@@ -29,7 +29,7 @@ def get_a(link):
     return A
 
 def forward_kinematics(angle1, angle2, angle3, angle4):
-    
+
     link1 = [2.5, angle1,0,0]
     link2 = [3.5,angle2,0,-math.pi/2]
     link3 = [3.5,angle3,0,math.pi/2]
