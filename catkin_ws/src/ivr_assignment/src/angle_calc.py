@@ -132,6 +132,17 @@ class angle_calculator:
 
     	return angle
 
+    def find_end_effector_pos(self, conversion, image1, image2):
+        cam1_red = conversion * self.findRedCentre(image1, 1)
+        cam2_red = conversion * self.findRedCentre(image2, 2)
+        cam1_yellow = conversion * self.findYellowCentre(image1, 1)
+        cam2_yellow = conversion * self.findYellowCentre(image2, 2)
+        [yr_y, yr_z1] = self.getDifference(cam1_yellow, cam1_red)
+        [yr_x, yr_z2] = self.getDifference(cam2_yellow, cam2_red)
+        yr_z = -(yr_z1 + yr_z2) / 2
+        red_xyz = [yr_x,yr_y,yr_z]
+        return np.array(red_xyz)
+
     def getDifference(self,centre2, centre1):
     	x_diff = centre1[0] - centre2[0]
     	y_diff = centre1[1] - centre2[1]
@@ -268,6 +279,35 @@ class angle_calculator:
     	# print("angle4 : " + str(angle4))
 
         return [0,angle2,angle3,angle4]
+
+    # def calculate_jacobian(self):
+    #     jacobian = np.array([])
+    #     return jacobian
+    #
+    # def control_closed(self, image1, image2):
+    #     # P gain
+    #     K_p = np.array([[10, 0], [0, 10]])
+    #     # D gain
+    #     K_d = np.array([[0.1, 0], [0, 0.1]])
+    #     # estimate time step
+    #     cur_time = np.array([rospy.get_time()])
+    #     dt = cur_time - self.time_previous_step
+    #     self.time_previous_step = cur_time
+    #     # robot end-effector position
+    #     pos = self.find_end_effector_pos(image1, image2)
+    #     # desired trajectory
+    #     pos_d = self.trajectory()
+    #     # estimate derivative of error
+    #     self.error_d = ((pos_d - pos) - self.error) / dt
+    #     # estimate error
+    #     self.error = pos_d - pos
+    #     conversion = self.pixel2meter(image1, 1)
+    #     q = self.getAngles(image1, image2, conversion)  # estimate initial value of joints'
+    #     J_inv = np.linalg.pinv(self.calculate_jacobian())  # calculating the psudeo inverse of Jacobian
+    #     dq_d = np.dot(J_inv, (np.dot(K_d, self.error_d.transpose()) + np.dot(K_p,
+    #                                                                          self.error.transpose())))  # control input (angular velocity of joints)
+    #     q_d = q + (dt * dq_d)  # control input (angular position of joints)
+    #     return q_d
 
     def find_sphere_centre(self,img):
         choice = 'cv2.TM_CCOEFF'

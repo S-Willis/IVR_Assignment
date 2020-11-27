@@ -1,5 +1,6 @@
 import math
 import numpy as np
+from sympy import cos, sin, Matrix
 
 def get_xyz(a_matrix):
     x = a_matrix[0,3]
@@ -14,10 +15,10 @@ def get_a(link):
     a = link[2]
     alpha = link[3]
 
-    s_theta = math.sin(theta)
-    c_theta = math.cos(theta)
-    s_alpha = math.sin(alpha)
-    c_alpha = math.cos(alpha)
+    s_theta = sin(theta)
+    c_theta = cos(theta)
+    s_alpha = sin(alpha)
+    c_alpha = cos(alpha)
 
 
 
@@ -99,7 +100,8 @@ def main():
                      [0,-0.5,1,-0.4],
                      [0,0.9,0.8,0.7]]
 
-    print(get_xyz(forward_kinematics(0, 0, 0, 0)))
+    test = Matrix(get_xyz(forward_kinematics(0, 0, 0, 0)))
+    print(test.jacobian(Matrix([0, 0, 0, 0])))
 
     for list in ultimate_list:
         print(str(list) + " :\n " + str(forward_kinematics(list[0],list[1],list[2],list[3])))
