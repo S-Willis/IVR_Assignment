@@ -39,13 +39,13 @@ class angle_calculator:
 
         self.bridge = CvBridge()
 
-        self.lastBluePositionCam1 = None
-        self.lastGreenPositionCam1 = None
-        self.lastRedPositionCam1 = None
+        self.lastBluePositionCam1 = [0,2.5]
+        self.lastGreenPositionCam1 = [0,6]
+        self.lastRedPositionCam1 = [0,9]
 
-        self.lastBluePositionCam2 = None
-        self.lastGreenPositionCam2 = None
-        self.lastRedPositionCam2 = None
+        self.lastBluePositionCam2 = [0,2.5]
+        self.lastGreenPositionCam2 = [0,6]
+        self.lastRedPositionCam2 = [0,9]
 
 
     def pixel2meter(self,image,camera):
@@ -148,20 +148,19 @@ class angle_calculator:
 
     def getAngles(self,cam1_image,cam2_image,conversion):
 
-    	cam1_yellow = conversion * self.findYellowCentre(cam1_image, 1)
-    	cam1_blue = conversion * self.findBlueCentre(cam1_image, 1)
-    	cam1_green = conversion * self.findGreenCentre(cam1_image, 1)
-    	cam1_red = conversion * self.findRedCentre(cam1_image, 1)
+        cam1_yellow = conversion * self.findYellowCentre(cam1_image, 1)
+        cam1_blue = conversion * self.findBlueCentre(cam1_image, 1)
+        cam1_green = conversion * self.findGreenCentre(cam1_image, 1)
+        cam1_red = conversion * self.findRedCentre(cam1_image, 1)
     	# print("Camera 1 centres:")
     	# print(cam1_yellow)
     	# print(cam1_blue)
     	# print(cam1_green)
     	# print(cam1_red)
-
-    	cam2_yellow = conversion*self.findYellowCentre(cam2_image, 2)
-    	cam2_blue = conversion*self.findBlueCentre(cam2_image, 2)
-    	cam2_green = conversion*self.findGreenCentre(cam2_image, 2)
-    	cam2_red = conversion*self.findRedCentre(cam2_image, 2)
+        cam2_yellow = conversion*self.findYellowCentre(cam2_image, 2)
+        cam2_blue = conversion*self.findBlueCentre(cam2_image, 2)
+        cam2_green = conversion*self.findGreenCentre(cam2_image, 2)
+        cam2_red = conversion*self.findRedCentre(cam2_image, 2)
 
 
     	# print("Camera 2 centres:")
@@ -171,9 +170,9 @@ class angle_calculator:
     	# print(cam2_red)
 
     	#distance in yz plane from yellow centre
-    	[yb_x,yb_z1] = self.getDifference(cam1_yellow,cam1_blue)
-    	[yg_x,yg_z1] = self.getDifference(cam1_yellow,cam1_green)
-    	[yr_x,yr_z1] = self.getDifference(cam1_yellow,cam1_red)
+        [yb_y,yb_z1] = self.getDifference(cam1_yellow,cam1_blue)
+        [yg_y,yg_z1] = self.getDifference(cam1_yellow,cam1_green)
+        [yr_y,yr_z1] = self.getDifference(cam1_yellow,cam1_red)
 
     	# print("yz plane:")
     	# print("blue : x=" + str(yb_x) + " z=" + str(yb_z1))
@@ -183,52 +182,74 @@ class angle_calculator:
 
 
     	#get distance in xz plane from yellow centre
-    	[yb_y,yb_z2] = self.getDifference(cam2_yellow,cam2_blue)
-    	[yg_y,yg_z2] = self.getDifference(cam2_yellow,cam2_green)
-    	[yr_y,yr_z2] = self.getDifference(cam2_yellow,cam2_red)
+        [yb_x,yb_z2] = self.getDifference(cam2_yellow,cam2_blue)
+        [yg_x,yg_z2] = self.getDifference(cam2_yellow,cam2_green)
+        [yr_x,yr_z2] = self.getDifference(cam2_yellow,cam2_red)
 
     	# print("xz plane:")
     	# print("blue : x=" + str(yb_y) + " z=" + str(yb_z2))
     	# print("green : x=" + str(yg_y) + " z=" + str(yg_z2))
     	# print("red : x=" + str(yr_y) + " z=" + str(yr_z2))
 
+        yb_z = -(yb_z1 + yb_z2) / 2
+        yg_z = -(yg_z1 + yg_z2) / 2
+        yr_z = -(yr_z1 + yr_z2) / 2
 
-    	yb_z = -(yb_z1 + yb_z2) / 2
-    	yg_z = -(yg_z1 + yg_z2) / 2
-    	yr_z = -(yr_z1 + yr_z2) / 2
+        yellow_xyz = [0,0,0]
+        blue_xyz = [yb_x,yb_y,yb_z]
+        green_xyz = [yg_x,yg_y,yg_z]
+        red_xyz = [yr_x,yr_y,yr_z]
 
-    	yellow_xyz = [0,0,0]
-    	blue_xyz = [yb_x,yb_y,yb_z]
-    	green_xyz = [yg_x,yg_y,yg_z]
-    	red_xyz = [yr_x,yr_y,yr_z]
+        yellow2blue = self.getVector(yellow_xyz,blue_xyz)
 
-    	# print("xyz coordinates")
-    	# print("yellow : " + str(yellow_xyz))
-    	# print("blue : " + str(blue_xyz))
-    	# print("green : " + str(green_xyz))
-    	# print("red : " + str(red_xyz))
+        drift2 = self.getAngle3D([1,0,0],yellow2blue) - math.pi/2
+        drift3 = math.pi/2 - self.getAngle3D([0,1,0],yellow2blue)
+        drift4 = self.getAngle3D([0,0,1],yellow2blue)
+        # print("drift 4 : " + str(drift4))
 
-    	yellow2blue = self.getVector(yellow_xyz,blue_xyz)
-
-    	drift2 = self.getAngle3D([1,0,0],yellow2blue) - math.pi/2
-    	drift3 = math.pi/2 - self.getAngle3D([0,1,0],yellow2blue)
-    	drift4 = self.getAngle3D([0,0,1],yellow2blue)
+        blue2green = self.getVector(blue_xyz,green_xyz)
 
 
+        anglex = self.getAngle3D([1,0,0],blue2green)
+        angley = self.getAngle3D([0,1,0],blue2green)
+        anglez = self.getAngle3D([0,0,1],blue2green)
 
-    	blue2green = self.getVector(blue_xyz,green_xyz)
+        angle2 = ((angley-drift2) - math.pi/2)
+        angle3 = math.pi/2 - (anglex+drift3)
 
-    	anglex = self.getAngle3D([1,0,0],blue2green)
-    	angley = self.getAngle3D([0,1,0],blue2green)
-    	anglez = self.getAngle3D([0,0,1],blue2green)
+        green2red = self.getVector(green_xyz,red_xyz)
+
+        blue_y = [3.5*math.cos(anglex),0,3.5*math.sin(anglex)]
+
+
+        angle4 = self.getAngle3D(blue2green,green2red) - drift4
 
 
 
-    	angle2 = ((angley-drift2) - math.pi/2)
-    	angle3 = math.pi/2 - (anglex+drift3)
+        # angle4 = self.getAngle3D(green2red,blue_y)
 
-    	green2red = self.getVector(green_xyz,red_xyz)
-    	angle4 = self.getAngle3D(green2red,blue2green) - drift4
+        #self.getAngle3D(green2red,blue_y)
+        # if(red_xyz[2]>green_xyz[2]+3.0*math.sin(angle4)):
+        #     angle4 = -angle4
+
+        # if(red_xyz[2])
+
+
+
+
+        # angle4 = self.getAngle3D([0,0,1],green2red) - self.getAngle3D([0,0,1],blue2green)
+
+        # angle4 = (self.getAngle3D([0,1,0],green2red) - math.pi/2) #- angle2 - drift4
+
+
+
+        # print("End-effector coordinates : " + str(red_xyz))
+
+        # print("xyz coordinates")
+        # print("yellow : " + str(yellow_xyz))
+        # print("blue : " + str(blue_xyz))
+        # print("green : " + str(green_xyz))
+        # print("red : " + str(red_xyz))
 
     	# print("yellow2blue length = " + str(getVectorLength(yellow2blue)))
     	# print("blue2green length = " + str(getVectorLength(blue2green)))
@@ -246,7 +267,7 @@ class angle_calculator:
     	# print("angle3 : " + str(angle3))
     	# print("angle4 : " + str(angle4))
 
-    	return [0,angle2,angle3,angle4]
+        return [0,angle2,angle3,angle4]
 
     def find_sphere_centre(self,img):
         choice = 'cv2.TM_CCOEFF'
@@ -298,12 +319,12 @@ class angle_calculator:
         yellowJointCentre1 = self.findYellowCentre(cam1_image,1)
         yellowJointCentre2 = self.findYellowCentre(cam2_image,2)
 
-        [s_x,s_z1] = self.getDifference(yellowJointCentre1,cam1_sphere_centre)
-        [s_y,s_z2] = self.getDifference(yellowJointCentre2,cam2_sphere_centre)
+        [s_y,s_z1] = self.getDifference(yellowJointCentre1,cam1_sphere_centre)
+        [s_x,s_z2] = self.getDifference(yellowJointCentre2,cam2_sphere_centre)
 
-        x = (s_x * (b*5/6)) + 0.5
-        y = (s_y * a) - 0.5
-        z = -(a*(s_z1+s_z2)/2)
+        x = s_x * b
+        y = s_y * b * 5/6
+        z = -(a*(s_z1+s_z2)/2) + 0.25
 
 
 

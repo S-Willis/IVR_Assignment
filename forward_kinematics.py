@@ -34,8 +34,8 @@ def forward_kinematics(angle1, angle2, angle3, angle4):
 
     link1 = [2.5, angle1, 0, 0]
     link2 = [0, angle2+(math.pi/2+angle1), 0, math.pi/2]
-    link3 = [0, angle3+math.pi/2-angle2, 3.5, -math.pi/2]
-    link4 = [0, angle3 + angle4, 3, -math.pi/2]
+    link3 = [3.5, angle3 - (angle2-math.pi), 0, math.pi/2]
+    link4 = [0, angle3 + angle4, 3, math.pi/2]
 
     #right results - [0.0, 0.0, 9.0]
     # link1 = [2.5, angle1,0,0]
