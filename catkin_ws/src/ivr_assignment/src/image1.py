@@ -71,9 +71,9 @@ class image_converter:
 
     try:
       self.image_pub1.publish(self.bridge.cv2_to_imgmsg(self.cv_image1, "bgr8"))
-      # self.robot_joint2_pub.publish(self.joint2)
-      # self.robot_joint3_pub.publish(self.joint3)
-      # self.robot_joint4_pub.publish(self.joint4)
+      self.robot_joint2_pub.publish(self.joint2)
+      self.robot_joint3_pub.publish(self.joint3)
+      self.robot_joint4_pub.publish(self.joint4)
     except CvBridgeError as e:
       print(e)
 

@@ -33,9 +33,20 @@ class angle_calculator:
         self.time_sync = message_filters.TimeSynchronizer([self.camera1_sub,self.camera2_sub],1)
         self.time_sync.registerCallback(self.callback)
 
-        filepath = os.path.join(sys.path[0],"sphere_template.png")
+        filepath_sphere = os.path.join(sys.path[0],"sphere_template.png")
+        self.sphere_img = cv2.imread(filepath_sphere,0)
 
-        self.sphere_img = cv2.imread(filepath,0)
+        filepath_yellow = os.path.join(sys.path[0],"yellow_template.png")
+        self.yellow_template = cv2.imread(filepath_yellow,0)
+
+        filepath_blue = os.path.join(sys.path[0],"blue_template.png")
+        self.blue_template = cv2.imread(filepath_blue,0)
+
+        filepath_green = os.path.join(sys.path[0],"green_template.png")
+        self.green_template = cv2.imread(filepath_green,0)
+
+        filepath_red = os.path.join(sys.path[0],"red_template.png")
+        self.red_template = cv2.imread(filepath_red,0)
 
         self.bridge = CvBridge()
 
@@ -112,7 +123,7 @@ class angle_calculator:
 
     def find_joint_centre(self, img, template, choice):
 		    method = eval(choice)
-		    template = cv2.imread(template, 0)
+		    # template = cv2.imread(template_pic, 0)
 		    # img = cv2.imread('image_copy_img1.png', 0)
 		    w, h = template.shape[::-1]
 
@@ -139,16 +150,16 @@ class angle_calculator:
 		    return centre
 
     def findYellowCentre(self, image, camera):
-       return self.find_joint_centre(image, "yellow_template.png", "cv2.TM_CCOEFF_NORMED")
+       return self.find_joint_centre(image, self.yellow_template, "cv2.TM_CCOEFF_NORMED")
 
     def findBlueCentre(self, image, camera):
-       return self.find_joint_centre(image, "blue_template.png", "cv2.TM_CCOEFF_NORMED")
+       return self.find_joint_centre(image, self.blue_template, "cv2.TM_CCOEFF_NORMED")
 
     def findGreenCentre(self, image, camera):
-       return self.find_joint_centre(image, "green_template.png", "cv2.TM_CCOEFF_NORMED")
+       return self.find_joint_centre(image, self.green_template, "cv2.TM_CCOEFF_NORMED")
 
     def findRedCentre(self, image, camera):
-       return self.find_joint_centre(image, "red_template.png", "cv2.TM_CCOEFF_NORMED")
+       return self.find_joint_centre(image, self.red_template, "cv2.TM_CCOEFF_NORMED")
 
     def getAngle3D(self,coord1, coord2):
     	coord1_u = coord1/np.linalg.norm(coord1)
@@ -332,11 +343,14 @@ class angle_calculator:
         cam1_image = self.bridge.imgmsg_to_cv2(camera1_data, "bgr8")
         cam2_image = self.bridge.imgmsg_to_cv2(camera2_data, "bgr8")
 
+        cam1_bw = cv2.cvtColor(cam1_image, cv2.COLOR_BGR2GRAY)
+        cam2_bw = cv2.cvtColor(cam2_image, cv2.COLOR_BGR2GRAY)
+
         # cam1_sphere_centre = self.find_sphere_centre(cam1_image)
         # cam2_sphere_centre = self.find_sphere_centre(cam2_image)
 
-        a = self.pixel2meter(cam1_image,1)
-        b = self.pixel2meter(cam2_image,2)
+        a = self.pixel2meter(cam1_bw,1)
+        b = self.pixel2meter(cam2_bw,2)
         # x = b * cam2_sphere_centre[0]
         # y = a * cam1_sphere_centre[0]
         # z = a * cam1_sphere_centre[1]
@@ -344,8 +358,8 @@ class angle_calculator:
 
         # print(combinedSphereCentre)
 
-        yellowJointCentre1 = self.findYellowCentre(cam1_image,1)
-        yellowJointCentre2 = self.findYellowCentre(cam2_image,2)
+        yellowJointCentre1 = self.findYellowCentre(cam1_bw,1)
+        yellowJointCentre2 = self.findYellowCentre(cam2_bw,2)
 
         # [s_y,s_z1] = self.getDifference(yellowJointCentre1,cam1_sphere_centre)
         # [s_x,s_z2] = self.getDifference(yellowJointCentre2,cam2_sphere_centre)
@@ -354,7 +368,7 @@ class angle_calculator:
         # y = s_y * b * 5/6
         # z = -(a*(s_z1+s_z2)/2) + 0.25
 
-        joint_angles = self.getAngles(cam1_image,cam2_image,a)
+        joint_angles = self.getAngles(cam1_bw,cam2_bw,a)
 
         angle1 = Float64()
         angle1.data = 0.0
