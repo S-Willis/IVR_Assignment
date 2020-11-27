@@ -32,24 +32,19 @@ def forward_kinematics(angle1, angle2, angle3, angle4):
 
     # link = [d , theta, r , alpha]
 
+<<<<<<< HEAD
     link1 = [2.5, angle1, 0, 0]
     link2 = [0, angle2+(math.pi/2+angle1), 0, math.pi/2]
     link3 = [3.5, angle3 - (angle2-math.pi), 0, math.pi/2]
     link4 = [0, angle3 + angle4, 3, math.pi/2]
+=======
+    link1 = [2.5, -math.pi/2 + angle1, 0, -math.pi/2]
+    link2 = [0, -math.pi/2 + angle2, 0, math.pi / 2]
+    link3 = [0, angle3, 3.5, -math.pi / 2]
+    link4 = [0, angle4, 3, 0]
+>>>>>>> 12fd33f483233498feb72ceb18435ec00d857111
 
-    #right results - [0.0, 0.0, 9.0]
-    # link1 = [2.5, angle1,0,0]
-    # link2 = [3.5,angle2,0,math.pi/2]
-    # link3 = [0,angle3,0,-math.pi/2]
-    # link4 = [3,angle4,0,math.pi/2]
-
-    #okay results - [9.0, 0.0, 0.0]
-    # link1 = [0, angle1,2.5,0]
-    # link2 = [0,angle2,0,math.pi/2]
-    # link3 = [0,angle3,3.5,-math.pi/2]
-    # link4 = [0,angle4,3.0,math.pi/2]
-
-    link_list = [link1,link2,link3,link4];
+    link_list = [link1, link2, link3, link4];
 
     mat_list = [None for x in range(4)]
 
@@ -61,19 +56,45 @@ def forward_kinematics(angle1, angle2, angle3, angle4):
     print(mat_list[2])
     print()
 
-    A02 = np.matmul(mat_list[0],mat_list[1])
-    print(A02)
-    print()
-    A03 = np.matmul(A02,mat_list[2])
-    print(A03)
-    print()
-    A04 = np.matmul(A03,mat_list[3])
-    print(A04)
 
-    return get_xyz(A04)
+    #L1_rotation = mat_list[0][np.ix_([0, 1, 2],[0, 1, 2])]
+    #print(np.matmul(np.array([1, 0, 0]), L1_rotation))
+    #print("-------------------------------")
+    # L2_rotation = mat_list[1][np.ix_([0, 1, 2],[0, 1, 2])]
+    # print(np.matmul(np.array([0, 0, -1]), L2_rotation))
+    # print("-------------------------------")
+    # L3_rotation = mat_list[2][np.ix_([0, 1, 2],[0, 1, 2])]
+    # print(np.matmul(np.array([0, 0, 1]), L3_rotation))
+    # print("-------------------------------")
+    L4_rotation = mat_list[3][np.ix_([0, 1, 2],[0, 1, 2])]
+    print(np.matmul(np.array([0, 0, 1]), L4_rotation))
+    print("-------------------------------")
+
+
+    A01 = mat_list[0]
+    # A01_rotation = A01[np.ix_([0, 1, 2],[0, 1, 2])]
+    # print(np.matmul(np.array([1, 0, 0]), A01_rotation))
+    # print("-------------------------------")
+
+    A02 = np.matmul(mat_list[0],mat_list[1])
+    # A02_rotation = A02[np.ix_([0, 1, 2],[0, 1, 2])]
+    # print(np.matmul(np.array([0, 1, 0]), A02_rotation))
+    # print("-------------------------------")
+
+    A03 = np.matmul(A02,mat_list[2])
+    # A03_rotation = A03[np.ix_([0, 1, 2],[0, 1, 2])]
+    # print(np.matmul(np.array([0, 1, 0]), A03_rotation))
+    # print("-------------------------------")
+
+    A04 = np.matmul(A03,mat_list[3])
+    # A04_rotation = A04[np.ix_([0, 1, 2],[0, 1, 2])]
+    # print(np.matmul(np.array([0, 1, 0]), A04_rotation))
+    # print("-------------------------------")
+    return(get_xyz(A04))
+    #return get_xyz(mat_list[3].dot(mat_list[2]).dot(mat_list[1]).dot(mat_list[0]))
 
 def main():
-    print(forward_kinematics(0,math.pi/2,0,0))
+    print(forward_kinematics(0, math.pi/2, 0, 0))
 
 if __name__ == '__main__':
     main()
