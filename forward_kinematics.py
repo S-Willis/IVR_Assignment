@@ -1,5 +1,6 @@
 import math
 import numpy as np
+from sympy import cos, sin, Matrix
 
 def get_xyz(a_matrix):
     x = a_matrix[0,3]
@@ -14,10 +15,10 @@ def get_a(link):
     a = link[2]
     alpha = link[3]
 
-    s_theta = math.sin(theta)
-    c_theta = math.cos(theta)
-    s_alpha = math.sin(alpha)
-    c_alpha = math.cos(alpha)
+    s_theta = sin(theta)
+    c_theta = cos(theta)
+    s_alpha = sin(alpha)
+    c_alpha = cos(alpha)
 
 
 
@@ -37,17 +38,17 @@ def forward_kinematics(angle1, angle2, angle3, angle4):
     link3 = [0, angle3, 3.5, -math.pi / 2]
     link4 = [0, angle4, 3, 0]
 
-    link_list = [link1, link2, link3, link4];
+    link_list = [link1, link2, link3, link4]
 
     mat_list = [None for x in range(4)]
 
     for i in range(4):
         mat_list[i] = get_a(link_list[i])
         # print(mat_list[i])
-    # print(mat_list[0])
-    # print()
-    # print(mat_list[2])
-    # print()
+    print(mat_list[0])
+    print()
+    print(mat_list[2])
+    print()
 
 
     #L1_rotation = mat_list[0][np.ix_([0, 1, 2],[0, 1, 2])]
@@ -59,9 +60,9 @@ def forward_kinematics(angle1, angle2, angle3, angle4):
     # L3_rotation = mat_list[2][np.ix_([0, 1, 2],[0, 1, 2])]
     # print(np.matmul(np.array([0, 0, 1]), L3_rotation))
     # print("-------------------------------")
-    # L4_rotation = mat_list[3][np.ix_([0, 1, 2],[0, 1, 2])]
-    # print(np.matmul(np.array([0, 0, 1]), L4_rotation))
-    # print("-------------------------------")
+    L4_rotation = mat_list[3][np.ix_([0, 1, 2],[0, 1, 2])]
+    print(np.matmul(np.array([0, 0, 1]), L4_rotation))
+    print("-------------------------------")
 
 
     A01 = mat_list[0]
@@ -83,8 +84,8 @@ def forward_kinematics(angle1, angle2, angle3, angle4):
     # A04_rotation = A04[np.ix_([0, 1, 2],[0, 1, 2])]
     # print(np.matmul(np.array([0, 1, 0]), A04_rotation))
     # print("-------------------------------")
-    return(get_xyz(A04))
-    #return get_xyz(mat_list[3].dot(mat_list[2]).dot(mat_list[1]).dot(mat_list[0]))
+
+    return(A04)
 
 def main():
 
@@ -99,7 +100,8 @@ def main():
                      [0,-0.5,1,-0.4],
                      [0,0.9,0.8,0.7]]
 
-    print(forward_kinematics(0,0, 0, 0))
+    test = Matrix(get_xyz(forward_kinematics(0, 0, 0, 0)))
+    print(test.jacobian(Matrix([0, 0, 0, 0])))
 
     for list in ultimate_list:
         print(str(list) + " :\n " + str(forward_kinematics(list[0],list[1],list[2],list[3])))

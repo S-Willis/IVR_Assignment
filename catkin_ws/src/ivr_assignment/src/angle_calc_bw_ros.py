@@ -56,71 +56,99 @@ class angle_calculator:
 
     	return metres0
 
-    def findCentre(self, image, lower, upper, colour, camera):
-       mask = cv2.inRange(image, lower, upper)
-       kernel = np.ones((5, 5), np.uint8)
-       mask = cv2.dilate(mask, kernel, iterations=3)
-       cv2.imwrite(colour+"_C1.png", mask)
-       M = cv2.moments(mask)
+    # def findCentre(self, image, lower, upper, colour, camera):
+    #    mask = cv2.inRange(image, lower, upper)
+    #    kernel = np.ones((5, 5), np.uint8)
+    #    mask = cv2.dilate(mask, kernel, iterations=3)
+    #    cv2.imwrite(colour+"_C1.png", mask)
+    #    M = cv2.moments(mask)
+		#
+    #    if(M['m00']==0):
+    #        if colour == "redJoint":
+    #            if camera == 1:
+    #                cx = self.lastRedPositionCam1[0]
+    #                cy = self.lastRedPositionCam1[1]
+    #            else:
+    #                cx = self.lastRedPositionCam2[0]
+    #                cy = self.lastRedPositionCam2[1]
+    #        elif colour == "greenJoint":
+    #            if camera == 1:
+    #                cx = self.lastGreenPositionCam1[0]
+    #                cy = self.lastGreenPositionCam1[1]
+    #            else:
+    #                cx = self.lastGreenPositionCam2[0]
+    #                cy = self.lastGreenPositionCam2[1]
+    #        elif colour == "blueJoint":
+    #            if camera == 1:
+    #                cx = self.lastBluePositionCam1[0]
+    #                cy = self.lastBluePositionCam1[1]
+    #            else:
+    #                cx = self.lastBluePosition[0]
+    #                cy = self.lastBluePosition[1]
+    #        else:
+    #            cx = 0
+    #            cy = 0
+    #    else:
+    #        cx = int(M['m10']/M['m00'])
+    #        cy = int(M['m01']/M['m00'])
+		#
+    #    if colour == "redJoint":
+    #        if camera == 1:
+    #            self.lastRedPositionCam1 = np.array([cx, cy])
+    #        else:
+    #            self.lastRedPositionCam2 = np.array([cx, cy])
+    #    elif colour == "greenJoint":
+    #        if camera == 1:
+    #            self.lastGreenPositionCam1 = np.array([cx, cy])
+    #        else:
+    #            self.lastGreenPositionCam2 = np.array([cx, cy])
+    #    elif colour == "blueJoint":
+    #        if camera == 1:
+    #            self.lastBluePositionCam1 = np.array([cx, cy])
+    #        else:
+    #            self.lastBluePositionCam2 = np.array([cx, cy])
+		#
+    #    return np.array([cx, cy])
 
-       if(M['m00']==0):
-           if colour == "redJoint":
-               if camera == 1:
-                   cx = self.lastRedPositionCam1[0]
-                   cy = self.lastRedPositionCam1[1]
-               else:
-                   cx = self.lastRedPositionCam2[0]
-                   cy = self.lastRedPositionCam2[1]
-           elif colour == "greenJoint":
-               if camera == 1:
-                   cx = self.lastGreenPositionCam1[0]
-                   cy = self.lastGreenPositionCam1[1]
-               else:
-                   cx = self.lastGreenPositionCam2[0]
-                   cy = self.lastGreenPositionCam2[1]
-           elif colour == "blueJoint":
-               if camera == 1:
-                   cx = self.lastBluePositionCam1[0]
-                   cy = self.lastBluePositionCam1[1]
-               else:
-                   cx = self.lastBluePosition[0]
-                   cy = self.lastBluePosition[1]
-           else:
-               cx = 0
-               cy = 0
-       else:
-           cx = int(M['m10']/M['m00'])
-           cy = int(M['m01']/M['m00'])
+    def find_joint_centre(self, img, template, choice):
+		    method = eval(choice)
+		    template = cv2.imread(template, 0)
+		    # img = cv2.imread('image_copy_img1.png', 0)
+		    w, h = template.shape[::-1]
 
-       if colour == "redJoint":
-           if camera == 1:
-               self.lastRedPositionCam1 = np.array([cx, cy])
-           else:
-               self.lastRedPositionCam2 = np.array([cx, cy])
-       elif colour == "greenJoint":
-           if camera == 1:
-               self.lastGreenPositionCam1 = np.array([cx, cy])
-           else:
-               self.lastGreenPositionCam2 = np.array([cx, cy])
-       elif colour == "blueJoint":
-           if camera == 1:
-               self.lastBluePositionCam1 = np.array([cx, cy])
-           else:
-               self.lastBluePositionCam2 = np.array([cx, cy])
+		    res = cv2.matchTemplate(img, template, method)
+		    min_cal, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+		    if method in [cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]:
+				    top_left = min_loc
+		    else:
+				    top_left = max_loc
+		    bottom_right = (top_left[0] + w, top_left[1] + h)
 
-       return np.array([cx, cy])
+		    cv2.rectangle(img, top_left, bottom_right, 0, 2)
+
+		    # plt.subplot(121), plt.imshow(res, cmap='gray')
+		    # plt.title('Matching Result'), plt.xticks([]), plt.yticks([])
+		    # plt.subplot(122), plt.imshow(img, cmap='gray')
+		    # plt.title('Detected Point'), plt.xticks([]), plt.yticks([])
+		    # plt.suptitle(choice)
+		    # plt.show()
+
+		    centre_x = int((bottom_right[0] - top_left[0]) / 2) + top_left[0]
+		    centre_y = int((bottom_right[1] - top_left[1]) / 2) + top_left[1]
+		    centre = np.array([centre_x, centre_y])
+		    return centre
 
     def findYellowCentre(self, image, camera):
-       return self.findCentre(image, (0, 80, 80), (30, 255, 255), "yellowJoint",camera)
+       return self.find_joint_centre(image, "yellow_template.png", "cv2.TM_CCOEFF_NORMED")
 
     def findBlueCentre(self, image, camera):
-       return self.findCentre(image, (90, 0, 0), (255, 70, 70), "blueJoint", camera)
+       return self.find_joint_centre(image, "blue_template.png", "cv2.TM_CCOEFF_NORMED")
 
     def findGreenCentre(self, image, camera):
-       return self.findCentre(image, (0, 60, 0), (50, 255, 50), "greenJoint", camera)
+       return self.find_joint_centre(image, "green_template.png", "cv2.TM_CCOEFF_NORMED")
 
     def findRedCentre(self, image, camera):
-       return self.findCentre(image, (0, 0, 40), (30, 30, 255), "redJoint", camera)
+       return self.find_joint_centre(image, "red_template.png", "cv2.TM_CCOEFF_NORMED")
 
     def getAngle3D(self,coord1, coord2):
     	coord1_u = coord1/np.linalg.norm(coord1)
@@ -131,17 +159,6 @@ class angle_calculator:
     	angle = np.arccos(dot_prod)
 
     	return angle
-
-    def find_end_effector_pos(self, conversion, image1, image2):
-        cam1_red = conversion * self.findRedCentre(image1, 1)
-        cam2_red = conversion * self.findRedCentre(image2, 2)
-        cam1_yellow = conversion * self.findYellowCentre(image1, 1)
-        cam2_yellow = conversion * self.findYellowCentre(image2, 2)
-        [yr_y, yr_z1] = self.getDifference(cam1_yellow, cam1_red)
-        [yr_x, yr_z2] = self.getDifference(cam2_yellow, cam2_red)
-        yr_z = -(yr_z1 + yr_z2) / 2
-        red_xyz = [yr_x,yr_y,yr_z]
-        return np.array(red_xyz)
 
     def getDifference(self,centre2, centre1):
     	x_diff = centre1[0] - centre2[0]
@@ -280,72 +297,43 @@ class angle_calculator:
 
         return [0,angle2,angle3,angle4]
 
-    # def calculate_jacobian(self):
-    #     jacobian = np.array([])
-    #     return jacobian
-    #
-    # def control_closed(self, image1, image2):
-    #     # P gain
-    #     K_p = np.array([[10, 0], [0, 10]])
-    #     # D gain
-    #     K_d = np.array([[0.1, 0], [0, 0.1]])
-    #     # estimate time step
-    #     cur_time = np.array([rospy.get_time()])
-    #     dt = cur_time - self.time_previous_step
-    #     self.time_previous_step = cur_time
-    #     # robot end-effector position
-    #     pos = self.find_end_effector_pos(image1, image2)
-    #     # desired trajectory
-    #     pos_d = self.trajectory()
-    #     # estimate derivative of error
-    #     self.error_d = ((pos_d - pos) - self.error) / dt
-    #     # estimate error
-    #     self.error = pos_d - pos
-    #     conversion = self.pixel2meter(image1, 1)
-    #     q = self.getAngles(image1, image2, conversion)  # estimate initial value of joints'
-    #     J_inv = np.linalg.pinv(self.calculate_jacobian())  # calculating the psudeo inverse of Jacobian
-    #     dq_d = np.dot(J_inv, (np.dot(K_d, self.error_d.transpose()) + np.dot(K_p,
-    #                                                                          self.error.transpose())))  # control input (angular velocity of joints)
-    #     q_d = q + (dt * dq_d)  # control input (angular position of joints)
-    #     return q_d
-
-    def find_sphere_centre(self,img):
-        choice = 'cv2.TM_CCOEFF'
-        method = eval(choice)
-        template = self.sphere_img
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-        w, h = template.shape[::-1]
-
-        res = cv2.matchTemplate(gray, template, method)
-        min_cal, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-        if method in [cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]:
-            top_left = min_loc
-        else:
-            top_left = max_loc
-        bottom_right = (top_left[0] + w, top_left[1] + h)
-
-        cv2.rectangle(img, top_left, bottom_right, 0, 2)
-
-        # plt.subplot(121), plt.imshow(res, cmap='gray')
-        # plt.title('Matching Result'), plt.xticks([]), plt.yticks([])
-        # plt.subplot(122), plt.imshow(img, cmap='gray')
-        # plt.title('Detected Point'), plt.xticks([]), plt.yticks([])
-        # plt.suptitle(choice)
-        # plt.show()
-
-        centre_x = int((bottom_right[0] - top_left[0]) / 2) + top_left[0]
-        centre_y = int((bottom_right[1] - top_left[1]) / 2) + top_left[1]
-        centre = np.array([centre_x, centre_y])
-        return centre
+    # def find_sphere_centre(self, img):
+    #     choice = 'cv2.TM_CCOEFF'
+    #     method = eval(choice)
+    #     template = self.sphere_img
+    #     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+		#
+    #     w, h = template.shape[::-1]
+		#
+    #     res = cv2.matchTemplate(gray, template, method)
+    #     min_cal, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+    #     if method in [cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]:
+    #         top_left = min_loc
+    #     else:
+    #         top_left = max_loc
+    #     bottom_right = (top_left[0] + w, top_left[1] + h)
+		#
+    #     cv2.rectangle(img, top_left, bottom_right, 0, 2)
+		#
+    #     # plt.subplot(121), plt.imshow(res, cmap='gray')
+    #     # plt.title('Matching Result'), plt.xticks([]), plt.yticks([])
+    #     # plt.subplot(122), plt.imshow(img, cmap='gray')
+    #     # plt.title('Detected Point'), plt.xticks([]), plt.yticks([])
+    #     # plt.suptitle(choice)
+    #     # plt.show()
+		#
+    #     centre_x = int((bottom_right[0] - top_left[0]) / 2) + top_left[0]
+    #     centre_y = int((bottom_right[1] - top_left[1]) / 2) + top_left[1]
+    #     centre = np.array([centre_x, centre_y])
+    #     return centre
 
     def callback(self, camera1_data, camera2_data):
 
         cam1_image = self.bridge.imgmsg_to_cv2(camera1_data, "bgr8")
         cam2_image = self.bridge.imgmsg_to_cv2(camera2_data, "bgr8")
 
-        cam1_sphere_centre = self.find_sphere_centre(cam1_image)
-        cam2_sphere_centre = self.find_sphere_centre(cam2_image)
+        # cam1_sphere_centre = self.find_sphere_centre(cam1_image)
+        # cam2_sphere_centre = self.find_sphere_centre(cam2_image)
 
         a = self.pixel2meter(cam1_image,1)
         b = self.pixel2meter(cam2_image,2)
@@ -359,12 +347,12 @@ class angle_calculator:
         yellowJointCentre1 = self.findYellowCentre(cam1_image,1)
         yellowJointCentre2 = self.findYellowCentre(cam2_image,2)
 
-        [s_y,s_z1] = self.getDifference(yellowJointCentre1,cam1_sphere_centre)
-        [s_x,s_z2] = self.getDifference(yellowJointCentre2,cam2_sphere_centre)
+        # [s_y,s_z1] = self.getDifference(yellowJointCentre1,cam1_sphere_centre)
+        # [s_x,s_z2] = self.getDifference(yellowJointCentre2,cam2_sphere_centre)
 
-        x = s_x * b
-        y = s_y * b * 5/6
-        z = -(a*(s_z1+s_z2)/2) + 0.25
+        # x = s_x * b
+        # y = s_y * b * 5/6
+        # z = -(a*(s_z1+s_z2)/2) + 0.25
 
         joint_angles = self.getAngles(cam1_image,cam2_image,a)
 
@@ -378,11 +366,11 @@ class angle_calculator:
         angle4.data = joint_angles[3]
 
         sphere_x = Float64()
-        sphere_x.data = x
+        # sphere_x.data = x
         sphere_y = Float64()
-        sphere_y.data = y
+        # sphere_y.data = y
         sphere_z = Float64()
-        sphere_z.data = z
+        # sphere_z.data = z
 
         try:
             self.angle2_pub.publish(angle2)
