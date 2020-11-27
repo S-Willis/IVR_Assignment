@@ -243,7 +243,7 @@ class angle_calculator:
 
 
 
-        # print("End-effector coordinates : " + str(red_xyz))
+        print("End-effector coordinates : " + str(red_xyz))
 
         # print("xyz coordinates")
         # print("yellow : " + str(yellow_xyz))
@@ -325,8 +325,6 @@ class angle_calculator:
         x = s_x * b
         y = s_y * b * 5/6
         z = -(a*(s_z1+s_z2)/2) + 0.25
-
-
 
         joint_angles = self.getAngles(cam1_image,cam2_image,a)
 

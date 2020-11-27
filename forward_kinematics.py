@@ -32,17 +32,10 @@ def forward_kinematics(angle1, angle2, angle3, angle4):
 
     # link = [d , theta, r , alpha]
 
-<<<<<<< HEAD
-    link1 = [2.5, angle1, 0, 0]
-    link2 = [0, angle2+(math.pi/2+angle1), 0, math.pi/2]
-    link3 = [3.5, angle3 - (angle2-math.pi), 0, math.pi/2]
-    link4 = [0, angle3 + angle4, 3, math.pi/2]
-=======
     link1 = [2.5, -math.pi/2 + angle1, 0, -math.pi/2]
     link2 = [0, -math.pi/2 + angle2, 0, math.pi / 2]
     link3 = [0, angle3, 3.5, -math.pi / 2]
     link4 = [0, angle4, 3, 0]
->>>>>>> 12fd33f483233498feb72ceb18435ec00d857111
 
     link_list = [link1, link2, link3, link4];
 
@@ -51,10 +44,10 @@ def forward_kinematics(angle1, angle2, angle3, angle4):
     for i in range(4):
         mat_list[i] = get_a(link_list[i])
         # print(mat_list[i])
-    print(mat_list[0])
-    print()
-    print(mat_list[2])
-    print()
+    # print(mat_list[0])
+    # print()
+    # print(mat_list[2])
+    # print()
 
 
     #L1_rotation = mat_list[0][np.ix_([0, 1, 2],[0, 1, 2])]
@@ -66,9 +59,9 @@ def forward_kinematics(angle1, angle2, angle3, angle4):
     # L3_rotation = mat_list[2][np.ix_([0, 1, 2],[0, 1, 2])]
     # print(np.matmul(np.array([0, 0, 1]), L3_rotation))
     # print("-------------------------------")
-    L4_rotation = mat_list[3][np.ix_([0, 1, 2],[0, 1, 2])]
-    print(np.matmul(np.array([0, 0, 1]), L4_rotation))
-    print("-------------------------------")
+    # L4_rotation = mat_list[3][np.ix_([0, 1, 2],[0, 1, 2])]
+    # print(np.matmul(np.array([0, 0, 1]), L4_rotation))
+    # print("-------------------------------")
 
 
     A01 = mat_list[0]
@@ -94,7 +87,22 @@ def forward_kinematics(angle1, angle2, angle3, angle4):
     #return get_xyz(mat_list[3].dot(mat_list[2]).dot(mat_list[1]).dot(mat_list[0]))
 
 def main():
-    print(forward_kinematics(0, math.pi/2, 0, 0))
+
+    ultimate_list = [[0,1.0,0.5,-1.7],
+                     [0,-1,1,1],
+                     [0,-1.7,-1.7,-1.7],
+                     [0,1,1,1],
+                     [0,0.5,0.5,0.5],
+                     [0,0.8,-0.8,1.7],
+                     [0,1,1,0.65],
+                     [0,0.6,-1.2,0.7],
+                     [0,-0.5,1,-0.4],
+                     [0,0.9,0.8,0.7]]
+
+    print(forward_kinematics(0,0, 0, 0))
+
+    for list in ultimate_list:
+        print(str(list) + " :\n " + str(forward_kinematics(list[0],list[1],list[2],list[3])))
 
 if __name__ == '__main__':
     main()
